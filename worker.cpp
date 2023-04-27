@@ -1,55 +1,67 @@
-// worker.cpp
 #include <iostream>
-#include <cstdlib>
 #include <ctime>
-#include <thread>
-#include <chrono>
-#include <unistd.h>
-#include <sys/types.h>
+#include <cstdlib>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <sys/msg.h>
 #include <signal.h>
-#include "shared_data.h"
+#include "resource_descriptor.h"
 
-const int BOUND_B = 10;
+using namespace std;
 
-bool running = true;
+typedef struct msgbuffer {
+    long mtype;
+    int action;
+    int pid;
+    int resource;
+    int amount;
+} msgbuffer;
 
-void sig_handler(int signum) {
-    running = false;
-}
+const int REQUEST_RESOURCES = 1;
+const int RELEASE_RESOURCES = 0;
+const int TERMINATE = -1;
 
-void clean_resources(int shmid, SharedData* shared_data) {
-    shmdt(shared_data);
-    shmctl(shmid, IPC_RMID, nullptr);
-}
+int main() {
+    srand(time(NULL));
+    int pid = getpid();
 
-int main(int argc, char* argv[]) {
-    signal(SIGINT, sig_handler);
-    signal(SIGTERM, sig_handler);
-
-    int process_id = atoi(argv[1]);
-    key_t shm_key = ftok("shmfile", SHM_KEY);
-    int shmid = shmget(shm_key, sizeof(SharedData), 0666 | IPC_CREAT);
-    SharedData* shared_data = (SharedData*)shmat(shmid, nullptr, 0);
-
-    srand(time(0) ^ process_id);
-
-    while (running) {
-        // Generate a random number in the range [0, BOUND_B]
-        int random_number = rand() % (BOUND_B + 1);
-
-        // Request or release resources based on the random number
-
-        // Check if the process should terminate
-        if (shared_data->terminate && shared_data->process_id == process_id) {
-            clean_resources(shmid, shared_data);
-            break;
-        }
-
-        // Sleep for a random duration between 0 and 250 milliseconds
-        std::this_thread::sleep_for(std::chrono::milliseconds(rand() % 251));
+    // Connect to the message queue
+    key_t msg_key = ftok("oss_mq.txt", 1);
+    int msqid = msgget(msg_key, PERMS);
+    if (msqid == -1) {
+        perror("msgget");
+        exit(EXIT_FAILURE);
     }
+
+    // Prepare the message
+    msgbuffer msg;
+    msg.mtype = 1; // Assuming 1 is the message type to communicate with oss
+    msg.pid = pid;
+
+    // Randomly decide between requesting resources, releasing resources, or terminating
+    int rand_decision = rand() % 100;
+
+    if (rand_decision < 80) { // 80% chance of requesting resources
+        msg.action = REQUEST_RESOURCES;
+        msg.resource = rand() % 10; // Randomly choose a resource from r0 to r9
+        msg.amount = rand() % 20 + 1; // Request a random amount of resources (1 to 20)
+
+    } else if (rand_decision < 95) { // 15% chance of releasing resources
+        msg.action = RELEASE_RESOURCES;
+        msg.resource = rand() % 10; // Randomly choose a resource from r0 to r9
+        msg.amount = rand() % 20 + 1; // Request a random amount of resources (1 to 20)
+
+    } else { // 5% chance of terminating
+        msg.action = TERMINATE;
+    }
+
+    // Send the message to the parent process (oss)
+    if (msgsnd(msqid, &msg, sizeof(msg) - sizeof(long), 0) == -1) {
+        perror("msgsnd");
+        exit(EXIT_FAILURE);
+    }
+
+    // ... (Rest of the worker code)
 
     return 0;
 }
