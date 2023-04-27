@@ -1,14 +1,15 @@
-typedef struct {
-    int seconds;
-    int nanoseconds;
-} LogicalClock;
+#define MAX_REC 20
+#define PERMS 0666
 
-typedef struct {
-    // Resource descriptors and other structures
-} SharedMemory;
-
-void init_shared_memory(SharedMemory *shm);
-void generate_processes(SharedMemory *shm);
-void process_messages(SharedMemory *shm, int msg_id);
-void deadlock_detection_and_recovery(SharedMemory *shm);
-int termination_conditions_met(SharedMemory *shm);
+struct resource_descriptor {
+    int r0;
+    int r1;
+    int r2;
+    int r3;
+    int r4;
+    int r5;
+    int r6;
+    int r7;
+    int r8;
+    int r9;
+}resource_descriptor;
