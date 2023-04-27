@@ -74,6 +74,8 @@ int main() {
         perror("shmget");
         exit(EXIT_FAILURE);
     }
+
+    printf("Shared memory setup\n");
     
     // Attach to shared memory
     void *shmaddr = shmat(shmid, NULL, 0);
