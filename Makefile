@@ -10,10 +10,10 @@ WORKER = worker
 
 all: $(OSS) $(WORKER)
 
-$(OSS): oss.cpp oss_shared.h
+$(OSS): oss.cpp resource_descriptor.h
 	$(CXX) $(CXXFLAGS) -o $(OSS) oss.cpp
 
-$(WORKER): worker.cpp oss_shared.h
+$(WORKER): worker.cpp resource_descriptor.h
 	$(CXX) $(CXXFLAGS) -o $(WORKER) worker.cpp
 
 clean:
