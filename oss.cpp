@@ -16,7 +16,6 @@
 #include <sys/shm.h>
 #include <sys/msg.h>
 #include <sys/wait.h>
-#include "resource_descriptor.h"
 
 using namespace std;
 
