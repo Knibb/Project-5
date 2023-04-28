@@ -49,7 +49,7 @@ typedef struct resource_descriptor {
     int r9;
 }resource_descriptor;
 
-struct PCB {
+typedef struct PCB {
     int occupied; // either true or false
     pid_t pid; // process id of this child
     int startSeconds; // time when it was forked
@@ -66,7 +66,7 @@ struct SimulatedClock {
 const int SHM_SIZE = sizeof(SimulatedClock) + MAX_USER_PROCESSES * sizeof(PCB);
 
 // Banker's algorithm to detect deadlocks
-bool deadlock_detected(const vector<PCB>, &pcbTable, const resource_descriptor &rd) {
+bool deadlock_detected(const vector<PCB> &pcbTable, const resource_descriptor &rd) {
     vector<bool> finish(MAX_USER_PROCESSES, false);
     resource_descriptor work = rd;
 
