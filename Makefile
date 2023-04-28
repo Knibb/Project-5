@@ -1,15 +1,17 @@
 CC=g++
-CFLAGS=-std=c++11 -Wall -Wextra
-LDFLAGS=-lrt
-DEPS = resource_descriptor.h
+CFLAGS=-std=c++11 -pthread
+DEPS=
+OBJ_OSS=oss.o resource_descriptor.o
+OBJ_WORKER=worker.o resource_descriptor.o
 
-all: oss worker
+%.o: %.cpp $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
 
-oss: oss.cpp $(DEPS)
-	$(CC) $(CFLAGS) -o oss oss.cpp $(LDFLAGS)
+oss: $(OBJ_OSS)
+	$(CC) -o $@ $^ $(CFLAGS)
 
-worker: worker.cpp $(DEPS)
-	$(CC) $(CFLAGS) -o worker worker.cpp $(LDFLAGS)
+worker: $(OBJ_WORKER)
+	$(CC) -o $@ $^ $(CFLAGS)
 
 clean:
-	rm -f oss worker
+	rm -f oss worker *.o
