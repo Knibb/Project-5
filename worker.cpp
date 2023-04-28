@@ -1,6 +1,7 @@
 #include <iostream>
 #include <ctime>
 #include <cstdlib>
+#include <fstream>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/msg.h>
@@ -33,6 +34,11 @@ SimulatedClock* simClock;
 int allocatedResources[10] = {0};
 int maxResourceInstances[10] = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
 
+int grantedRequests = 0;
+int terminatedProcesses = 0;
+int deadlockDetections = 0;
+ofstream logFile;
+
 // Signal handler function for cleanup and termination
 void signalHandler(int signum) {
     // Detach from shared memory
@@ -46,17 +52,33 @@ void signalHandler(int signum) {
         perror("shmctl");
     }
 
+    // Close log file
+    logFile.close();
+
     // Terminate the process
     exit(signum);
 }
 
-int main() {
+int main(int argc, char* argv[]) {
     srand(time(NULL));
     int pid = getpid();
 
     //Setup signal handlers
     signal(SIGINT, signalHandler);
     signal(SIGTERM, signalHandler);
+
+    // Process command-line arguments for log verbosity
+    int logVerbosity = 1; // Default log verbosity level
+    if (argc > 1) {
+        logVerbosity = atoi(argv[1]);
+    }
+
+    // Open log file for writing
+    logFile.open("worker_log.txt", ios::out | ios::app);
+    if (!logFile.is_open()) {
+        perror("Failed to open worker_log.txt");
+        exit(EXIT_FAILURE);
+    }
 
     // Connect to the message queue
     key_t msg_key = ftok("oss_mq.txt", 1);
@@ -146,19 +168,51 @@ int main() {
             // Process the reply
             if (reply.action == REQUEST_RESOURCES) {
                 allocatedResources[reply.resource] += reply.amount;
-            } else if (reply.action == RELEASE_RESOURCES) {
+                grantedRequests++;
+                if (logVerbosity > 1) {
+                    logFile << "Worker " << pid << ": Granted request for resource " << reply.resource << ", amount: " << reply.amount << endl;
+                }
+            }else if (reply.action == RELEASE_RESOURCES) {
                 allocatedResources[reply.resource] -= reply.amount;
+                if (logVerbosity > 1) {
+                    logFile << "Worker " << pid << ": Released resource " << reply.resource << ", amount: " << reply.amount << endl;
+                }
             } else if (reply.action == TERMINATE) {
                 terminated = true;
+                terminatedProcesses++;
+                if (logVerbosity > 0) {
+                    logFile << "Worker " << pid << ": Terminated" << endl;
+                }
             }
         }
-    }
+
+        // Print the table of allocated resources if the log verbosity is set to the highest level (3)
+        if (logVerbosity > 2) {
+            logFile << "Allocated Resources Table for Worker " << pid << ":\n";
+            logFile << "Resource\tAmount\n";
+            for (int i = 0; i < 10; i++) {
+                logFile << "r" << i << "\t\t" << allocatedResources[i] << "\n";
+            }
+            logFile << endl;
+        }
+
+    } // End of while loop
+
+    // Output statistics
+    logFile << "Worker " << pid << " Statistics:\n";
+    logFile << "Granted Requests: " << grantedRequests << "\n";
+    logFile << "Terminated Processes: " << terminatedProcesses << "\n";
+    logFile << "Deadlock Detections: " << deadlockDetections << "\n";
+    logFile << endl;
 
     // Detach from shared memory before exiting normally
     if (shmdt(simClock) == -1) {
         perror("shmdt");
         exit(EXIT_FAILURE);
     }
+
+    // Close log file
+    logFile.close();
 
     return 0;
 }
