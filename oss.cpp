@@ -22,6 +22,7 @@ using namespace std;
 
 #define PERMS 0666
 
+const int MAX_REC 20;
 const int MAX_USER_PROCESSES = 18;
 const int MAX_TERMINATED = 40;
 const int MAX_RUNTIME = 5;
@@ -36,6 +37,19 @@ typedef struct msgbuffer {
     int amount;
 }msgbuffer;
 
+struct resource_descriptor {
+    int r0;
+    int r1;
+    int r2;
+    int r3;
+    int r4;
+    int r5;
+    int r6;
+    int r7;
+    int r8;
+    int r9;
+}resource_descriptor;
+
 struct PCB {
     int occupied; // either true or false
     pid_t pid; // process id of this child
@@ -43,12 +57,12 @@ struct PCB {
     int startNano; // time when it was forked
     int blocked; // -1 if not blocked otherwise 0-9 on what it is blocked on
     int resources[10];
-};
+}PCB;
 
 struct SimulatedClock {
     unsigned int seconds;
     unsigned int nanoseconds;
-};
+}SimulatedClock;
 
 const int SHM_SIZE = sizeof(SimulatedClock) + MAX_USER_PROCESSES * sizeof(PCB);
 
