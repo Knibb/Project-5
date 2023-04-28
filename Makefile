@@ -1,20 +1,15 @@
-# Compiler
-CXX = g++
+CC=g++
+CFLAGS=-std=c++11 -Wall -Wextra
+LDFLAGS=-lrt
+DEPS = resource_descriptor.h
 
-# Compiler flags
-CXXFLAGS = -Wall -std=c++11
+all: oss worker
 
-# Executables
-OSS = oss
-WORKER = worker
+oss: oss.cpp $(DEPS)
+	$(CC) $(CFLAGS) -o oss oss.cpp $(LDFLAGS)
 
-all: $(OSS) $(WORKER)
-
-$(OSS): oss.cpp resource_descriptor.h
-	$(CXX) $(CXXFLAGS) -o $(OSS) oss.cpp
-
-$(WORKER): worker.cpp resource_descriptor.h
-	$(CXX) $(CXXFLAGS) -o $(WORKER) worker.cpp
+worker: worker.cpp $(DEPS)
+	$(CC) $(CFLAGS) -o worker worker.cpp $(LDFLAGS)
 
 clean:
-	rm -f $(OSS) $(WORKER)
+	rm -f oss worker
