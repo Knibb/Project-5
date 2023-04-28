@@ -66,7 +66,7 @@ struct SimulatedClock {
 const int SHM_SIZE = sizeof(SimulatedClock) + MAX_USER_PROCESSES * sizeof(PCB);
 
 // Banker's algorithm to detect deadlocks
-bool deadlock_detected(const std::vector<PCB> &pcbTable, const resource_descriptor &rd) {
+bool deadlock_detected(const vector<PCB>, &pcbTable, const resource_descriptor &rd) {
     vector<bool> finish(MAX_USER_PROCESSES, false);
     resource_descriptor work = rd;
 
