@@ -20,10 +20,13 @@
 
 using namespace std;
 
+#define PERMS 0666
+
 const int MAX_USER_PROCESSES = 18;
 const int MAX_TERMINATED = 40;
 const int MAX_RUNTIME = 5;
 const key_t SHM_KEY = 1616; // Shared memory key
+const int UPDATE_CLOCK = 2; // New message action for clock updates
 
 typedef struct msgbuffer {
     long mtype;
@@ -218,6 +221,25 @@ int main() {
             simClock->seconds += simClock->nanoseconds / 1000000000;
             simClock->nanoseconds %= 1000000000;
         }
+
+        // Check for UPDATE_CLOCK messages (non-blocking)
+        msgbuffer clockUpdate;
+        while (msgrcv(msqid, &clockUpdate, sizeof(clockUpdate) - sizeof(long), 1, IPC_NOWAIT) != -1) {
+            if (clockUpdate.action == UPDATE_CLOCK) {
+                simClock->nanoseconds += clockUpdate.amount;
+                if (simClock->nanoseconds >= 1000000000) {
+                    simClock->seconds += 1;
+                    simClock->nanoseconds -= 1000000000;
+                }
+            }
+        }
+
+    // Receive a message from the worker processes
+    msgbuffer msg;
+    if (msgrcv(msqid, &msg, sizeof(msg) - sizeof(long), 1, 0) == -1) {
+        perror("msgrcv");
+        exit(EXIT_FAILURE);
+    }
 
         // Check for deadlock every simulated second
         if (simClock->seconds >= deadlock_check_time) {

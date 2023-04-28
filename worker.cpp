@@ -10,6 +10,8 @@
 
 using namespace std;
 
+#define PERMS 0666
+
 typedef struct msgbuffer {
     long mtype;
     int action;
@@ -26,6 +28,7 @@ struct SimulatedClock {
 const int REQUEST_RESOURCES = 1;
 const int RELEASE_RESOURCES = 0;
 const int TERMINATE = -1;
+const int UPDATE_CLOCK = 2; // New message action for clock updates
 const key_t SHM_KEY = 1616; // Shared memory key
 
 int shmid;
@@ -58,6 +61,8 @@ void signalHandler(int signum) {
     // Terminate the process
     exit(signum);
 }
+
+int requestsCounter = 0;
 
 int main(int argc, char* argv[]) {
     srand(time(NULL));
@@ -108,14 +113,22 @@ int main(int argc, char* argv[]) {
                 terminated = true;
             }
         } else {
-            // Update the simulated clock at random times (between 0 and 250ms)
-            unsigned int timeToAdd = rand() % 250001; // Generate a random number in the range [0, 250000] nanoseconds
-            simClock->nanoseconds += timeToAdd;
-            if (simClock->nanoseconds >= 1000000000) {
-                simClock->seconds += 1;
-                simClock->nanoseconds -= 1000000000;
+            // Update the simulated clock at randome times (between 0 and 250ms)
+            unsigned int timeToAdd = rand() % 250001;
+
+            // Send a message to oss to request a clock update
+            msgbuffer clockUpdate;
+            clockUpdate.mtype = 1;
+            clockUpdate.pid = pid;
+            clockUpdate.action = UPDATE_CLOCK;
+            clockUpdate.amount = timeToAdd;
+
+            if (msgsnd(msqid, &clockUpdate, sizeof(clockUpdate) - sizeof(long), 0) == -1) {
+                perror("msgsnd");
+                exit(EXIT_FAILURE);
             }
         }
+    }
 
         // If terminated, release all resources and send termination message
         if (terminated) {
@@ -142,7 +155,7 @@ int main(int argc, char* argv[]) {
             if (rand_decision < 80) { // 80% chance of requesting resources
                 msg.action = REQUEST_RESOURCES;
                 msg.resource = rand() % 10; // Randomly choose a resource from r0 to r9
-                int maxRequest = maxInstances[msg.resource] - allocatedResources[msg.resource];
+                int maxRequest = maxResourceInstances[msg.resource] - allocatedResources[msg.resource];
                 msg.amount = rand() % maxRequest + 1; // Request a random amount of resources within the allowed limit
             } else if (rand_decision < 95) { // 15% chance of releasing resources
                 msg.action = RELEASE_RESOURCES;
@@ -169,9 +182,21 @@ int main(int argc, char* argv[]) {
             if (reply.action == REQUEST_RESOURCES) {
                 allocatedResources[reply.resource] += reply.amount;
                 grantedRequests++;
+                requestsCounter++;
                 if (logVerbosity > 1) {
                     logFile << "Worker " << pid << ": Granted request for resource " << reply.resource << ", amount: " << reply.amount << endl;
                 }
+
+                // Output the allocated resources table every 20 granted requests
+                if (requestsCounter % 20 == 0) {
+                    logFile << "Allocated Resources Table for Worker " << pid << ":\n";
+                    logFile << "Resource\tAmount\n";
+                    for (int i = 0; i < 10; i++) {
+                        logFile << "r" << i << "\t\t" << allocatedResources[i] << "\n";
+                    }
+                    logFile << endl;
+                }
+
             }else if (reply.action == RELEASE_RESOURCES) {
                 allocatedResources[reply.resource] -= reply.amount;
                 if (logVerbosity > 1) {

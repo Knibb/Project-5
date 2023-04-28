@@ -1,5 +1,4 @@
 #define MAX_REC 20
-#define PERMS 0666
 
 struct resource_descriptor {
     int r0;
