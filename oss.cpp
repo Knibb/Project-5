@@ -21,7 +21,7 @@ using namespace std;
 
 #define PERMS 0666
 
-const int MAX_REC 20;
+const int MAX_REC = 20;
 const int MAX_USER_PROCESSES = 18;
 const int MAX_TERMINATED = 40;
 const int MAX_RUNTIME = 5;
