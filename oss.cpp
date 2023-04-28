@@ -133,7 +133,6 @@ void output_state(PCB *pcbTable, resource_descriptor &my_resource_descriptor) {
 int main() {
     
     time_t startTime = time(NULL);
-    msgbuffer msg;
     system("touch oss_mq.txt");
 
     if ((key_t msg_key = ftok("oss_mq.txt", 1)) == -1) {
