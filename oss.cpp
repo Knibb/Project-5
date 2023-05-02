@@ -65,54 +65,6 @@ struct SimulatedClock {
 
 const int SHM_SIZE = sizeof(SimulatedClock) + MAX_USER_PROCESSES * sizeof(PCB);
 
-// Banker's algorithm to detect deadlocks
-bool deadlock_detected(const vector<PCB> &pcbTable, const resource_descriptor &rd) {
-    vector<bool> finish(MAX_USER_PROCESSES, false);
-    resource_descriptor work = rd;
-
-    for (int i = 0; i < MAX_USER_PROCESSES; ++i) {
-        if (!pcbTable[i].occupied || pcbTable[i].blocked != -1) {
-            finish[i] = true;
-        }
-    }
-
-    bool found = true;
-    while (found) {
-        found = false;
-
-        for (int i = 0; i < MAX_USER_PROCESSES; ++i) {
-            if (!finish[i]) {
-                bool possible = true;
-                for (int j = 0; j < 10; ++j) {
-                    if (pcbTable[i].resources[j] > work.resources[j]) {
-                        possible = false;
-                        break;
-                    }
-                }
-
-                if (possible) {
-                    found = true;
-                    finish[i] = true;
-                    for (int j = 0; j < 10; ++j) {
-                        work.resources[j] += pcbTable[i].resources[j];
-                    }
-                }
-            }
-        }
-    }
-
-    for (int i = 0; i < MAX_USER_PROCESSES; ++i) {
-        if (!finish[i]) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-// Initialize the deadlock_check_time variable
-int deadlock_check_time = 1;
-
 void output_state(PCB *pcbTable, resource_descriptor &my_resource_descriptor) {
     ofstream log_file("oss.log", ios::app);
     
@@ -252,42 +204,6 @@ int main() {
         perror("msgrcv");
         exit(EXIT_FAILURE);
     }
-
-        // Check for deadlock every simulated second
-        if (simClock->seconds >= deadlock_check_time) {
-            if (deadlock_detected(pcbTable, my_resource_descriptor)) {
-                // Deadlock detected, resolve it by killing one process at a time
-                bool deadlock_resolved = false;
-                while (!deadlock_resolved) {
-                    for (int i = 0; i < MAX_USER_PROCESSES; ++i) {
-                        if (pcbTable[i].occupied && pcbTable[i].blocked != -1) {
-                            // Kill the process and release its resources
-                            kill(pcbTable[i].pid, SIGTERM);
-                            terminatedChildren++;
-                            activeChildren--;
-
-                            for (int j = 0; j < 10; ++j) {
-                                my_resource_descriptor.resources[j] += pcbTable[i].resources[j];
-                                pcbTable[i].resources[j] = 0;
-                            }
-
-                            pcbTable[i].occupied = false;
-                            pcbTable[i].pid = 0;
-                            pcbTable[i].blocked = -1;
-
-                            // Check if the deadlock is resolved after killing the process
-                            if (!deadlock_detected(pcbTable, my_resource_descriptor)) {
-                                deadlock_resolved = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Schedule the next deadlock check
-            deadlock_check_time++;
-        }
 
         // Check if it's time to fork a new child process
         if (simClock->nanoseconds >= nextForkTime) {
