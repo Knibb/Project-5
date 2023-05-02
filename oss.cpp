@@ -65,36 +65,6 @@ struct SimulatedClock {
 
 const int SHM_SIZE = sizeof(SimulatedClock) + MAX_USER_PROCESSES * sizeof(PCB);
 
-void output_state(PCB *pcbTable, resource_descriptor &my_resource_descriptor) {
-    ofstream log_file("oss.log", ios::app);
-    
-    log_file << "Current System State:\n";
-    log_file << "Resources: ";
-    for (int i = 0; i < 10; ++i) {
-        log_file << "R" << i << ": " << my_resource_descriptor.resources[i] << " ";
-    }
-    log_file << "\n";
-
-    log_file << "Processes:\n";
-    for (int i = 0; i < MAX_USER_PROCESSES; ++i) {
-        if (pcbTable[i].occupied) {
-            log_file << "PID: " << pcbTable[i].pid << ", Blocked: ";
-            if (pcbTable[i].blocked != -1) {
-                log_file << "True, Resource: " << pcbTable[i].blocked << "\n";
-            } else {
-                log_file << "False\n";
-            }
-            log_file << "Allocated Resources: ";
-            for (int j = 0; j < 10; ++j) {
-                log_file << "R" << j << ": " << pcbTable[i].resources[j] << " ";
-            }
-            log_file << "\n";
-        }
-    }
-
-    log_file.close();
-}
-
 int main() {
     
     time_t startTime = time(NULL);
@@ -336,7 +306,6 @@ int main() {
                     }
                 }
             }
-            output_state(pcbTable, my_resource_descriptor);
         }
     }
     
@@ -369,8 +338,6 @@ int main() {
         perror("msgctl");
         exit(EXIT_FAILURE);
     }
-
-    output_state(pcbTable, my_resource_descriptor);
 
     return 0;
 }
