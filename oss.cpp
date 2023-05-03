@@ -87,7 +87,7 @@ int main() {
     printf("Message queue setup\n");
 
     // Allocated shared memory
-    int shmid = shmget(SHM_KEY, SHM_SIZE, PERMS | IPCREAT);
+    int shmid = shmget(SHM_KEY, SHM_SIZE, PERMS | IPC_CREAT);
     if (shmid < 0) {
         perror("shmget");
         exit(EXIT_FAILURE);
