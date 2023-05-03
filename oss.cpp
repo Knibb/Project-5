@@ -113,13 +113,16 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    // Initialize resource descriptors
-    struct resource_descriptor my_resource_descriptor;
-
-    //Set all resources to MAX values
-    for (int i = 0; i < 10; ++i){
-        my_resource_descriptor.resources[i] = MAX_REC;
-    }
+    resource_descriptor.r0 = MAX_REC;
+    resource_descriptor.r1 = MAX_REC;
+    resource_descriptor.r2 = MAX_REC;
+    resource_descriptor.r3 = MAX_REC;
+    resource_descriptor.r4 = MAX_REC;
+    resource_descriptor.r5 = MAX_REC;
+    resource_descriptor.r6 = MAX_REC;
+    resource_descriptor.r7 = MAX_REC;
+    resource_descriptor.r8 = MAX_REC;
+    resource_descriptor.r9 = MAX_REC;
     
 
     int children_created = 0;
@@ -136,8 +139,6 @@ int main() {
     uniform_int_distribution<> forkDis(1, 500);
 
     unsigned int nextForkTime = 0;
-
-    output_state(pcbTable, my_resource_descriptor);
 
     while (activeChildren < MAX_USER_PROCESSES && children_created < MAX_TERMINATED) {
         // Check if 5 real-world seconds have passed
