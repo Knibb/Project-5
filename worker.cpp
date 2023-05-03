@@ -103,122 +103,105 @@ int main(int argc, char* argv[]) {
     SimulatedClock startTime = *simClock;
     bool terminated = false;
 
-    while (!terminated) {
-        // Check if it's time to terminate
-        unsigned int elapsedTime = (simClock->seconds - startTime.seconds) * 1000000000 + (simClock->nanoseconds - startTime.nanoseconds);
-        if (elapsedTime >= 1000000000) { // 1 second in nanoseconds
-            int terminateChance = rand() % 100;
-            if (terminateChance < 10) { // 10% chance to terminate after 1 second
-                terminated = true;
+    // Check if it's time to terminate
+    unsigned int elapsedTime = (simClock->seconds - startTime.seconds) * 1000000000 + (simClock->nanoseconds - startTime.nanoseconds);
+    if (elapsedTime >= 1000000000) { // 1 second in nanoseconds
+        int terminateChance = rand() % 100;
+        if (terminateChance < 10) { // 10% chance to terminate after 1 second
+            terminated = true;
+        }
+    }
+
+    // If terminated, release all resources and send termination message
+    if (terminated) {
+        msgbuffer msg;
+        msg.mtype = 1; 
+        msg.pid = pid;
+        msg.action = TERMINATE;
+
+        if (msgsnd(msqid, &msg, sizeof(msg) - sizeof(long), 0) == -1) {
+            perror("msgsnd");
+            exit(EXIT_FAILURE);
+        }
+    } else {
+
+        // Prepare the message
+        msgbuffer msg;
+        msg.mtype = 1; 
+        msg.pid = pid;
+
+        // Randomly decide between requesting resources, releasing resources, or terminating
+        int rand_decision = rand() % 100;
+        
+
+        if (rand_decision < 80) { // 80% chance of requesting resources
+            msg.action = REQUEST_RESOURCES;
+            msg.resource = rand() % 10; // Randomly choose a resource from r0 to r9
+            int maxRequest = maxResourceInstances[msg.resource] - allocatedResources[msg.resource];
+            msg.amount = rand() % maxRequest + 1; // Request a random amount of resources within the allowed limit
+        } else if (rand_decision < 95) { // 15% chance of releasing resources
+            msg.action = RELEASE_RESOURCES;
+            msg.resource = rand() % 10; // Randomly choose a resource from r0 to r9
+            msg.amount = rand() % (allocatedResources[msg.resource] + 1); // Release a random amount of allocated resources
+        } else { // 5% chance of terminating
+            msg.action = TERMINATE;
+        }
+
+        // Send the message to the parent process (oss)
+        if (msgsnd(msqid, &msg, sizeof(msg) - sizeof(long), 0) == -1) {
+            perror("msgsnd");
+            exit(EXIT_FAILURE);
+        }
+
+        // Wait for a message back indicating the request was granted before continuing
+        msgbuffer reply;
+        if (msgrcv(msqid, &reply, sizeof(reply) - sizeof(long), pid, 0) == -1) {
+            perror("msgrcv");
+            exit(EXIT_FAILURE);
+        }
+
+        // Process the reply
+        if (reply.action == REQUEST_RESOURCES) {
+            allocatedResources[reply.resource] += reply.amount;
+            grantedRequests++;
+            requestsCounter++;
+            if (logVerbosity > 1) {
+                logFile << "Worker " << pid << ": Granted request for resource " << reply.resource << ", amount: " << reply.amount << endl;
             }
-        } else {
-            // Update the simulated clock at randome times (between 0 and 250ms)
-            unsigned int timeToAdd = rand() % 250001;
 
-            // Send a message to oss to request a clock update
-            msgbuffer clockUpdate;
-            clockUpdate.mtype = 1;
-            clockUpdate.pid = pid;
-            clockUpdate.action = UPDATE_CLOCK;
-            clockUpdate.amount = timeToAdd;
+            // Output the allocated resources table every 20 granted requests
+            if (requestsCounter % 20 == 0) {
+                logFile << "Allocated Resources Table for Worker " << pid << ":\n";
+                logFile << "Resource\tAmount\n";
+                for (int i = 0; i < 10; i++) {
+                    logFile << "r" << i << "\t\t" << allocatedResources[i] << "\n";
+                }
+                logFile << endl;
+            }
 
-            if (msgsnd(msqid, &clockUpdate, sizeof(clockUpdate) - sizeof(long), 0) == -1) {
-                perror("msgsnd");
-                exit(EXIT_FAILURE);
+        }else if (reply.action == RELEASE_RESOURCES) {
+            allocatedResources[reply.resource] -= reply.amount;
+            if (logVerbosity > 1) {
+                logFile << "Worker " << pid << ": Released resource " << reply.resource << ", amount: " << reply.amount << endl;
+            }
+        } else if (reply.action == TERMINATE) {
+            terminated = true;
+            terminatedProcesses++;
+            if (logVerbosity > 0) {
+                logFile << "Worker " << pid << ": Terminated" << endl;
             }
         }
     }
 
-        // If terminated, release all resources and send termination message
-        if (terminated) {
-            msgbuffer msg;
-            msg.mtype = 1; 
-            msg.pid = pid;
-            msg.action = TERMINATE;
-
-            if (msgsnd(msqid, &msg, sizeof(msg) - sizeof(long), 0) == -1) {
-                perror("msgsnd");
-                exit(EXIT_FAILURE);
-            }
-        } else {
-
-            // Prepare the message
-            msgbuffer msg;
-            msg.mtype = 1; 
-            msg.pid = pid;
-
-            // Randomly decide between requesting resources, releasing resources, or terminating
-            int rand_decision = rand() % 100;
-            
-
-            if (rand_decision < 80) { // 80% chance of requesting resources
-                msg.action = REQUEST_RESOURCES;
-                msg.resource = rand() % 10; // Randomly choose a resource from r0 to r9
-                int maxRequest = maxResourceInstances[msg.resource] - allocatedResources[msg.resource];
-                msg.amount = rand() % maxRequest + 1; // Request a random amount of resources within the allowed limit
-            } else if (rand_decision < 95) { // 15% chance of releasing resources
-                msg.action = RELEASE_RESOURCES;
-                msg.resource = rand() % 10; // Randomly choose a resource from r0 to r9
-                msg.amount = rand() % (allocatedResources[msg.resource] + 1); // Release a random amount of allocated resources
-            } else { // 5% chance of terminating
-                msg.action = TERMINATE;
-            }
-
-            // Send the message to the parent process (oss)
-            if (msgsnd(msqid, &msg, sizeof(msg) - sizeof(long), 0) == -1) {
-                perror("msgsnd");
-                exit(EXIT_FAILURE);
-            }
-
-            // Wait for a message back indicating the request was granted before continuing
-            msgbuffer reply;
-            if (msgrcv(msqid, &reply, sizeof(reply) - sizeof(long), pid, 0) == -1) {
-                perror("msgrcv");
-                exit(EXIT_FAILURE);
-            }
-
-            // Process the reply
-            if (reply.action == REQUEST_RESOURCES) {
-                allocatedResources[reply.resource] += reply.amount;
-                grantedRequests++;
-                requestsCounter++;
-                if (logVerbosity > 1) {
-                    logFile << "Worker " << pid << ": Granted request for resource " << reply.resource << ", amount: " << reply.amount << endl;
-                }
-
-                // Output the allocated resources table every 20 granted requests
-                if (requestsCounter % 20 == 0) {
-                    logFile << "Allocated Resources Table for Worker " << pid << ":\n";
-                    logFile << "Resource\tAmount\n";
-                    for (int i = 0; i < 10; i++) {
-                        logFile << "r" << i << "\t\t" << allocatedResources[i] << "\n";
-                    }
-                    logFile << endl;
-                }
-
-            }else if (reply.action == RELEASE_RESOURCES) {
-                allocatedResources[reply.resource] -= reply.amount;
-                if (logVerbosity > 1) {
-                    logFile << "Worker " << pid << ": Released resource " << reply.resource << ", amount: " << reply.amount << endl;
-                }
-            } else if (reply.action == TERMINATE) {
-                terminated = true;
-                terminatedProcesses++;
-                if (logVerbosity > 0) {
-                    logFile << "Worker " << pid << ": Terminated" << endl;
-                }
-            }
+    // Print the table of allocated resources if the log verbosity is set to the highest level (3)
+    if (logVerbosity > 2) {
+        logFile << "Allocated Resources Table for Worker " << pid << ":\n";
+        logFile << "Resource\tAmount\n";
+        for (int i = 0; i < 10; i++) {
+            logFile << "r" << i << "\t\t" << allocatedResources[i] << "\n";
         }
-
-        // Print the table of allocated resources if the log verbosity is set to the highest level (3)
-        if (logVerbosity > 2) {
-            logFile << "Allocated Resources Table for Worker " << pid << ":\n";
-            logFile << "Resource\tAmount\n";
-            for (int i = 0; i < 10; i++) {
-                logFile << "r" << i << "\t\t" << allocatedResources[i] << "\n";
-            }
-            logFile << endl;
-        }
+        logFile << endl;
+    }
 
     } // End of while loop
 
