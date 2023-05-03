@@ -26,7 +26,6 @@ const int MAX_USER_PROCESSES = 18;
 const int MAX_TERMINATED = 40;
 const int MAX_RUNTIME = 5;
 const key_t SHM_KEY = 1616; // Shared memory key
-const int UPDATE_CLOCK = 2; // New message action for clock updates
 
 typedef struct msgbuffer {
     long mtype;
@@ -171,13 +170,16 @@ int main() {
     uniform_int_distribution<> forkDis(1, 500);
 
     unsigned int nextForkTime = 0;
+    int REQUEST_RESOURCES = 1
+    int RELEASE_RESOURCES = 0
+    int TERMINATE = -1
 
-    while (activeChildren < MAX_USER_PROCESSES && children_created < MAX_TERMINATED) {
+    while (terminatedChildren < MAX_TERMINATED) {
         // Check if 5 real-world seconds have passed
         time_t currentTime = time(NULL);
         if (difftime(currentTime, startTime) >= MAX_RUNTIME) {
             // More than 5 seconds have passed
-            break;
+            MAX_TERMINATED = terminatedChildren;
         }
 
         // Attach to shared memory
@@ -190,25 +192,6 @@ int main() {
             simClock->seconds += simClock->nanoseconds / 1000000000;
             simClock->nanoseconds %= 1000000000;
         }
-
-        // Check for UPDATE_CLOCK messages (non-blocking)
-        msgbuffer clockUpdate;
-        while (msgrcv(msqid, &clockUpdate, sizeof(clockUpdate) - sizeof(long), 1, IPC_NOWAIT) != -1) {
-            if (clockUpdate.action == UPDATE_CLOCK) {
-                simClock->nanoseconds += clockUpdate.amount;
-                if (simClock->nanoseconds >= 1000000000) {
-                    simClock->seconds += 1;
-                    simClock->nanoseconds -= 1000000000;
-                }
-            }
-        }
-
-    // Receive a message from the worker processes
-    msgbuffer msg;
-    if (msgrcv(msqid, &msg, sizeof(msg) - sizeof(long), 1, 0) == -1) {
-        perror("msgrcv");
-        exit(EXIT_FAILURE);
-    }
 
         // Check if it's time to fork a new child process
         if (simClock->nanoseconds >= nextForkTime && findEmptyPCBIndex(pcbTable) != -1) {
@@ -235,10 +218,12 @@ int main() {
                     pcbTable[childIndex].occupied = true;
                     pcbTable[childIndex].pid = pid;
                     pcbTable[childIndex].blocked = -1;
+                    pcbTable[childIndex].startSeconds = simClock->seconds;
+                    pcbTable[childIndex].startNano = simClock->nanosecondsnanoseconds;
                 } 
             }
 
-            //update the next for time
+            //update the next fork time
             unsigned int forkIncrement = forkDis(gen);
             nextForkTime = simClock->nanoseconds + forkIncrement;
 
@@ -247,7 +232,7 @@ int main() {
         }
 
         ssize_t result = msgrcv(msgid, &msg, sizeof(msg) - sizeof(msg.mtype), 0, IPC_NOWAIT);
-        if (result < 0) {
+        if (result == -1) {
             // Check if the error was caused by no message being available
             if (errno == ENOMSG) {
                 // No message available, continue execution
