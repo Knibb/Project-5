@@ -113,16 +113,18 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    resource_descriptor.r0 = MAX_REC;
-    resource_descriptor.r1 = MAX_REC;
-    resource_descriptor.r2 = MAX_REC;
-    resource_descriptor.r3 = MAX_REC;
-    resource_descriptor.r4 = MAX_REC;
-    resource_descriptor.r5 = MAX_REC;
-    resource_descriptor.r6 = MAX_REC;
-    resource_descriptor.r7 = MAX_REC;
-    resource_descriptor.r8 = MAX_REC;
-    resource_descriptor.r9 = MAX_REC;
+    resource_descriptor my_recs;
+
+    my_recs.r0 = MAX_REC;
+    my_recs.r1 = MAX_REC;
+    my_recs.r2 = MAX_REC;
+    my_recs.r3 = MAX_REC;
+    my_recs.r4 = MAX_REC;
+    my_recs.r5 = MAX_REC;
+    my_recs.r6 = MAX_REC;
+    my_recs.r7 = MAX_REC;
+    my_recs.r8 = MAX_REC;
+    my_recs.r9 = MAX_REC;
     
 
     int children_created = 0;
