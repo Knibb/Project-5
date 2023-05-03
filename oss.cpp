@@ -61,7 +61,7 @@ typedef struct PCB {
 struct SimulatedClock {
     unsigned int seconds;
     unsigned int nanoseconds;
-}SimulatedClock;
+};
 
 const int SHM_SIZE = sizeof(SimulatedClock) + MAX_USER_PROCESSES * sizeof(PCB);
 
