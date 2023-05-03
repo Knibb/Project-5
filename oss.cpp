@@ -55,13 +55,22 @@ typedef struct PCB {
     int startSeconds; // time when it was forked
     int startNano; // time when it was forked
     int blocked; // -1 if not blocked otherwise 0-9 on what it is blocked on
-    int resources[10];
+    struct resources_descriptor recs;
 }PCB;
 
 struct SimulatedClock {
     unsigned int seconds;
     unsigned int nanoseconds;
 };
+
+int findEmptyPCBIndex(PCB table[]) {
+    for (int i = 0; i < 18; i++) {
+        if (table[i].occupied == 0) {
+            return i;
+        }
+    }
+    return (-1);
+}
 
 const int SHM_SIZE = sizeof(SimulatedClock) + MAX_USER_PROCESSES * sizeof(PCB);
 
@@ -71,6 +80,27 @@ int main() {
     system("touch oss_mq.txt");
     int msqid;
     key_t msg_key;
+    
+    PCB pcbTable[18];
+    for (int i = 0; i < 18; i++)
+    {
+        pcbTable[i].blocked = -1;
+        pcbTable[i].occupied = 0;
+        pcbTable[i].pid = 0;
+        pcbTable[i].startNano = 0;
+        pcbTable[i].startSeconds = 0;
+        pcbTable[i].recs.r0 = 0;
+        pcbTable[i].recs.r1 = 0;
+        pcbTable[i].recs.r2 = 0;
+        pcbTable[i].recs.r3 = 0;
+        pcbTable[i].recs.r4 = 0;
+        pcbTable[i].recs.r5 = 0;
+        pcbTable[i].recs.r6 = 0;
+        pcbTable[i].recs.r7 = 0;
+        pcbTable[i].recs.r8 = 0;
+        pcbTable[i].recs.r9 = 0;
+    }
+    
 
     if ((msg_key = ftok("oss_mq.txt", 1)) == -1) {
         perror("msg_q ftok error");
@@ -181,7 +211,7 @@ int main() {
     }
 
         // Check if it's time to fork a new child process
-        if (simClock->nanoseconds >= nextForkTime) {
+        if (simClock->nanoseconds >= nextForkTime && findEmptyPCBIndex(pcbTable) != -1) {
            pid_t pid = fork();
 
             if (pid < 0) {
