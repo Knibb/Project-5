@@ -55,7 +55,7 @@ typedef struct PCB {
     int startSeconds; // time when it was forked
     int startNano; // time when it was forked
     int blocked; // -1 if not blocked otherwise 0-9 on what it is blocked on
-    struct resources_descriptor recs;
+    resources_descriptor recs;
 }PCB;
 
 struct SimulatedClock {
