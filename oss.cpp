@@ -69,8 +69,10 @@ int main() {
     
     time_t startTime = time(NULL);
     system("touch oss_mq.txt");
+    int msqid;
+    key_t msg_key;
 
-    if ((key_t msg_key = ftok("oss_mq.txt", 1)) == -1) {
+    if ((msg_key = ftok("oss_mq.txt", 1)) == -1) {
         perror("msg_q ftok error");
         exit(EXIT_FAILURE);
     }
