@@ -24,6 +24,19 @@ struct SimulatedClock {
     unsigned int nanoseconds;
 };
 
+typedef struct resource_descriptor {
+    int r0;
+    int r1;
+    int r2;
+    int r3;
+    int r4;
+    int r5;
+    int r6;
+    int r7;
+    int r8;
+    int r9;
+}resource_descriptor;
+
 const int REQUEST_RESOURCES = 1;
 const int RELEASE_RESOURCES = 0;
 const int TERMINATE = -1;
@@ -32,9 +45,6 @@ const key_t SHM_KEY = 1616; // Shared memory key
 
 int shmid;
 SimulatedClock* simClock;
-
-int allocatedResources[10] = {0};
-int maxResourceInstances[10] = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
 
 int grantedRequests = 0;
 int terminatedProcesses = 0;
@@ -66,6 +76,21 @@ int requestsCounter = 0;
 int main(int argc, char* argv[]) {
     srand(time(NULL));
     int pid = getpid();
+
+    struct resource_descriptor locRec;
+
+    //Initialize local resources
+    locRec.r0 = 0;
+    locRec.r1 = 0;
+    locRec.r2 = 0;
+    locRec.r3 = 0;
+    locRec.r4 = 0;
+    locRec.r5 = 0;
+    locRec.r6 = 0;
+    locRec.r7 = 0;
+    locRec.r8 = 0;
+    locRec.r9 = 0;
+
 
     //Setup signal handlers
     signal(SIGINT, signalHandler);

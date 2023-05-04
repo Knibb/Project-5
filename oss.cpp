@@ -77,8 +77,9 @@ int main() {
     
     time_t startTime = time(NULL);
     system("touch oss_mq.txt");
-    int msqid;
+    int msgid;
     key_t msg_key;
+    msgbuffer msg;
     
     PCB pcbTable[18];
     for (int i = 0; i < 18; i++)
@@ -170,9 +171,9 @@ int main() {
     uniform_int_distribution<> forkDis(1, 500);
 
     unsigned int nextForkTime = 0;
-    int REQUEST_RESOURCES = 1
-    int RELEASE_RESOURCES = 0
-    int TERMINATE = -1
+    int REQUEST_RESOURCES = 1;
+    int RELEASE_RESOURCES = 0;
+    int TERMINATE = -1;
 
     while (terminatedChildren < MAX_TERMINATED) {
         // Check if 5 real-world seconds have passed
@@ -192,22 +193,26 @@ int main() {
             simClock->seconds += simClock->nanoseconds / 1000000000;
             simClock->nanoseconds %= 1000000000;
         }
-
+    
         // Check if it's time to fork a new child process
         if (simClock->nanoseconds >= nextForkTime && findEmptyPCBIndex(pcbTable) != -1) {
            pid_t pid = fork();
-
+            
             if (pid < 0) {
                 perror("fork");
                 exit(EXIT_FAILURE);
-            } else if (pid == 0) {
+            }
+
+            else if (pid == 0) {
                 //child
                 execl("./worker", "worker", (char *) NULL);
 
                 // should reach this but if we do throw error
                 perror("execl");
                 exit(EXIT_FAILURE);
-            } else {
+            }
+
+            else {
                 // Parent
                 activeChildren++;
                 children_created++;
@@ -222,7 +227,7 @@ int main() {
                     pcbTable[childIndex].startNano = simClock->nanosecondsnanoseconds;
                 } 
             }
-
+            
             //update the next fork time
             unsigned int forkIncrement = forkDis(gen);
             nextForkTime = simClock->nanoseconds + forkIncrement;
@@ -232,6 +237,7 @@ int main() {
         }
 
         ssize_t result = msgrcv(msgid, &msg, sizeof(msg) - sizeof(msg.mtype), 0, IPC_NOWAIT);
+
         if (result == -1) {
             // Check if the error was caused by no message being available
             if (errno == ENOMSG) {
@@ -258,25 +264,166 @@ int main() {
 
             if (msg.action == REQUEST_RESOURCES) {
                 // Request resources
-                if (my_resource_descriptor.resources[msg.resource] >= msg.amount) {
-                    // Grant the request, update the resource descriptor and process allocation
-                    my_resource_descriptor.resources[msg.resource] -= msg.amount;
-                    pcbTable[childIndex].resources[msg.resource] += msg.amount;
-                } else {
-                    // Not enough resources available, block the process
-                    pcbTable[childIndex].blocked = msg.resource;
-                    blocked_queues[msg.resource].push(msg.pid);
+                bool sendMsg = false;
+                switch (msg.resource) {
+                    case 0:
+                    if (my_recs.r0 > 0){
+                        sendMsg = true;
+                        pcbTable[childIndex].recs.r0 += 1;
+                        my_recs.r0--;
+                        if (msgsnd(msgid, &msg, sizeof(/*what goes here*/), 0) == -1) {
+                            perror("msgsnd");
+                            exit(EXIT_FAILURE);
+                        }                        
+                    } else {
+                        // Not enough resources available, block the process
+                        pcbTable[childIndex].blocked = msg.resource;
+                        blocked_queues[msg.resource].push(msg.pid);
+                    }
+                    case 1:
+                    if (my_recs.r1 > 0){
+                        sendMsg = true;
+                        pcbTable[childIndex].recs.r1 += 1;
+                        my_recs.r1--;
+                        if (msgsnd(msgid, &msg, sizeof(/*what goes here*/), 0) == -1) {
+                            perror("msgsnd");
+                            exit(EXIT_FAILURE);
+                        }                        
+                    } else {
+                        // Not enough resources available, block the process
+                        pcbTable[childIndex].blocked = msg.resource;
+                        blocked_queues[msg.resource].push(msg.pid);
+                    }
+                    case 2:
+                    if (my_recs.r2 > 0){
+                        sendMsg = true;
+                        pcbTable[childIndex].recs.r2 += 1;
+                        my_recs.r2--;
+                        if (msgsnd(msgid, &msg, sizeof(/*what goes here*/), 0) == -1) {
+                            perror("msgsnd");
+                            exit(EXIT_FAILURE);
+                        }                        
+                    } else {
+                        // Not enough resources available, block the process
+                        pcbTable[childIndex].blocked = msg.resource;
+                        blocked_queues[msg.resource].push(msg.pid);
+                    }
+                    case 3:
+                    if (my_recs.r3 > 0){
+                        sendMsg = true;
+                        pcbTable[childIndex].recs.r3 += 1;
+                        my_recs.r3--;
+                        if (msgsnd(msgid, &msg, sizeof(/*what goes here*/), 0) == -1) {
+                            perror("msgsnd");
+                            exit(EXIT_FAILURE);
+                        }                        
+                    } else {
+                        // Not enough resources available, block the process
+                        pcbTable[childIndex].blocked = msg.resource;
+                        blocked_queues[msg.resource].push(msg.pid);
+                    }
+                    case 4:
+                    if (my_recs.r4 > 0){
+                        sendMsg = true;
+                        pcbTable[childIndex].recs.r4 += 1;
+                        my_recs.r4--;
+                        if (msgsnd(msgid, &msg, sizeof(/*what goes here*/), 0) == -1) {
+                            perror("msgsnd");
+                            exit(EXIT_FAILURE);
+                        }                        
+                    } else {
+                        // Not enough resources available, block the process
+                        pcbTable[childIndex].blocked = msg.resource;
+                        blocked_queues[msg.resource].push(msg.pid);
+                    }
+                    case 5:
+                    if (my_recs.r5 > 0){
+                        sendMsg = true;
+                        pcbTable[childIndex].recs.r5 += 1;
+                        my_recs.r5--;
+                        if (msgsnd(msgid, &msg, sizeof(/*what goes here*/), 0) == -1) {
+                            perror("msgsnd");
+                            exit(EXIT_FAILURE);
+                        }                        
+                    } else {
+                        // Not enough resources available, block the process
+                        pcbTable[childIndex].blocked = msg.resource;
+                        blocked_queues[msg.resource].push(msg.pid);
+                    }
+                    case 6:
+                    if (my_recs.r6 > 0){
+                        sendMsg = true;
+                        pcbTable[childIndex].recs.r6 += 1;
+                        my_recs.r6--;
+                        if (msgsnd(msgid, &msg, sizeof(/*what goes here*/), 0) == -1) {
+                            perror("msgsnd");
+                            exit(EXIT_FAILURE);
+                        }                        
+                    } else {
+                        // Not enough resources available, block the process
+                        pcbTable[childIndex].blocked = msg.resource;
+                        blocked_queues[msg.resource].push(msg.pid);
+                    }
+                    case 7:
+                    if (my_recs.r7 > 0){
+                        sendMsg = true;
+                        pcbTable[childIndex].recs.r7 += 1;
+                        my_recs.r7--;
+                        if (msgsnd(msgid, &msg, sizeof(/*what goes here*/), 0) == -1) {
+                            perror("msgsnd");
+                            exit(EXIT_FAILURE);
+                        }                        
+                    } else {
+                        // Not enough resources available, block the process
+                        pcbTable[childIndex].blocked = msg.resource;
+                        blocked_queues[msg.resource].push(msg.pid);
+                    }
+                    case 8:
+                    if (my_recs.r8 > 0){
+                        sendMsg = true;
+                        pcbTable[childIndex].recs.r8 += 1;
+                        my_recs.r8--;
+                        if (msgsnd(msgid, &msg, sizeof(/*what goes here*/), 0) == -1) {
+                            perror("msgsnd");
+                            exit(EXIT_FAILURE);
+                        }                        
+                    } else {
+                        // Not enough resources available, block the process
+                        pcbTable[childIndex].blocked = msg.resource;
+                        blocked_queues[msg.resource].push(msg.pid);
+                    }
+                    case 9:
+                    if (my_recs.r9 > 0){
+                        sendMsg = true;
+                        pcbTable[childIndex].recs.r9 += 1;
+                        my_recs.r9--;
+                        if (msgsnd(msgid, &msg, sizeof(/*what goes here*/), 0) == -1) {
+                            perror("msgsnd");
+                            exit(EXIT_FAILURE);
+                        }                        
+                    } else {
+                        // Not enough resources available, block the process
+                        pcbTable[childIndex].blocked = msg.resource;
+                        blocked_queues[msg.resource].push(msg.pid);
+                    }
                 }
-            } else if (msg.action == RELEASE_RESOURCES) {
+                
+            }else if (msg.action == RELEASE_RESOURCES) {
                 // Release resources
-                if (pcbTable[childIndex].resources[msg.resource] >= msg.amount) {
-                    // Release the resources, update the resource descriptor and process allocation
-                    pcbTable[childIndex].resources[msg.resource] -= msg.amount;
-                    my_resource_descriptor.resources[msg.resource] += msg.amount;
-                } else {
-                    // Error: process trying to release more resources than it owns
-                    cerr << "Error: process trying to release more resources than it owns. PID: " << msg.pid << endl;
+                bool sendMsg = false;
+                switch (msg.resource) {
+                    case 1:
+                        /* code */
+                        break;
+                    
+                    default:
+                        break;
                 }
+
+                // } else {
+                //     // Error: process trying to release more resources than it owns
+                //     cerr << "Error: process trying to release more resources than it owns. PID: " << msg.pid << endl;
+                // }
             } else if (msg.action == TERMINATE) {
                 // Terminate process
                 waitpid(msg.pid, NULL, 0); // wait for resources to get released and for process to die
@@ -293,8 +440,8 @@ int main() {
                 pcbTable[childIndex].occupied = false;
                 pcbTable[childIndex].pid = 0;
                 pcbTable[childIndex].blocked = -1;
-            } else {
-                cout << "Invalid message received. Action: " << msg.action << endl;
+            // } else {
+            //     cout << "Invalid message received. Action: " << msg.action << endl;
             }
 
             // Check blocked queues
