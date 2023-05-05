@@ -23,7 +23,6 @@ using namespace std;
 
 const int MAX_REC = 20;
 const int MAX_USER_PROCESSES = 18;
-const int MAX_TERMINATED = 40;
 const int MAX_RUNTIME = 5;
 const key_t SHM_KEY = 1616; // Shared memory key
 
@@ -80,6 +79,7 @@ int main() {
     int msgid;
     key_t msg_key;
     msgbuffer msg;
+    int MAX_TERMINATED = 40;
     
     PCB pcbTable[18];
     for (int i = 0; i < 18; i++)
@@ -224,7 +224,7 @@ int main() {
                     pcbTable[childIndex].pid = pid;
                     pcbTable[childIndex].blocked = -1;
                     pcbTable[childIndex].startSeconds = simClock->seconds;
-                    pcbTable[childIndex].startNano = simClock->nanosecondsnanoseconds;
+                    pcbTable[childIndex].startNano = simClock->nanoseconds;
                 } 
             }
             
@@ -460,8 +460,8 @@ int main() {
 
                 // Release all resources held by the process
                 for (int i = 0; i < 10; ++i) {
-                    my_resource_descriptor.resources[i] += pcbTable[childIndex].resources[i];
-                    pcbTable[childIndex].resources[i] = 0;
+                    my_recs.resources[i] += pcbTable[childIndex].recs[i];
+                    pcbTable[childIndex].recs[i] = 0;
                 }
 
                 // Mark the PCB entry as unoccupied
@@ -469,13 +469,14 @@ int main() {
                 pcbTable[childIndex].pid = 0;
                 pcbTable[childIndex].blocked = -1;
             } else {
+                int unblockedIndex = -1; // Declare unblockedIndex here
+
                 // Check if any blocked processes can be unblocked
                 if (!blocked_queues[msg.resource].empty()) {
                     int unblockedPid = blocked_queues[msg.resource].front();
                     blocked_queues[msg.resource].pop();
 
                     // Find the unblocked process in the PCB table
-                    int unblockedIndex = -1;
                     for (int i = 0; i < 18; i++) {
                         if (pcbTable[i].pid == unblockedPid) {
                             unblockedIndex = i;
