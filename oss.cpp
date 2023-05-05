@@ -108,7 +108,7 @@ int main() {
     }
 
     // Create a message queue
-    int msgid = msgget(msg_key, PERMS | IPC_CREAT);
+    msgid = msgget(msg_key, PERMS | IPC_CREAT);
     if ( msgid == -1) {
         perror("msgget");
         exit(EXIT_FAILURE);
