@@ -502,10 +502,11 @@ int main() {
                 pcbTable[childIndex].blocked = -1;
             } else {
                 int unblockedIndex = -1; // Declare unblockedIndex here
+                int unblockedPid;
 
                 // Check if any blocked processes can be unblocked
                 if (!blocked_queues[msg.resource].empty()) {
-                    int unblockedPid = blocked_queues[msg.resource].front();
+                    unblockedPid = blocked_queues[msg.resource].front();
                     blocked_queues[msg.resource].pop();
 
                     // Find the unblocked process in the PCB table
