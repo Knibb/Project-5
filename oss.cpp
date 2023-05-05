@@ -527,7 +527,7 @@ int main() {
                     // Send a message to the unblocked process
                     msg.mtype = unblockedPid;
                     msg.resource = msg.resource;
-                    msg.action = GRANT_RESOURCES;
+                    msg.action = REQUEST_RESOURCES;
                     if (msgsnd(msgid, &msg, sizeof(msg) - sizeof(long), 0) == -1) {
                         perror("msgsnd");
                         exit(EXIT_FAILURE);
