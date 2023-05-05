@@ -271,7 +271,7 @@ int main() {
                         sendMsg = true;
                         pcbTable[childIndex].recs.r0 += 1;
                         my_recs.r0--;
-                        if (msgsnd(msgid, &msg, sizeof(/*what goes here*/), 0) == -1) {
+                        if (msgsnd(msgid, &msg,sizeof(msg) - sizeof(long), 0) == -1) {
                             perror("msgsnd");
                             exit(EXIT_FAILURE);
                         }                        
@@ -285,7 +285,7 @@ int main() {
                         sendMsg = true;
                         pcbTable[childIndex].recs.r1 += 1;
                         my_recs.r1--;
-                        if (msgsnd(msgid, &msg, sizeof(/*what goes here*/), 0) == -1) {
+                        if (msgsnd(msgid, &msg,sizeof(msg) - sizeof(long), 0) == -1) {
                             perror("msgsnd");
                             exit(EXIT_FAILURE);
                         }                        
@@ -299,7 +299,7 @@ int main() {
                         sendMsg = true;
                         pcbTable[childIndex].recs.r2 += 1;
                         my_recs.r2--;
-                        if (msgsnd(msgid, &msg, sizeof(/*what goes here*/), 0) == -1) {
+                        if (msgsnd(msgid, &msg, sizeof(msg) - sizeof(long), 0) == -1) {
                             perror("msgsnd");
                             exit(EXIT_FAILURE);
                         }                        
@@ -313,7 +313,7 @@ int main() {
                         sendMsg = true;
                         pcbTable[childIndex].recs.r3 += 1;
                         my_recs.r3--;
-                        if (msgsnd(msgid, &msg, sizeof(/*what goes here*/), 0) == -1) {
+                        if (msgsnd(msgid, &msg,sizeof(msg) - sizeof(long), 0) == -1) {
                             perror("msgsnd");
                             exit(EXIT_FAILURE);
                         }                        
@@ -327,7 +327,7 @@ int main() {
                         sendMsg = true;
                         pcbTable[childIndex].recs.r4 += 1;
                         my_recs.r4--;
-                        if (msgsnd(msgid, &msg, sizeof(/*what goes here*/), 0) == -1) {
+                        if (msgsnd(msgid, &msg,sizeof(msg) - sizeof(long), 0) == -1) {
                             perror("msgsnd");
                             exit(EXIT_FAILURE);
                         }                        
@@ -341,7 +341,7 @@ int main() {
                         sendMsg = true;
                         pcbTable[childIndex].recs.r5 += 1;
                         my_recs.r5--;
-                        if (msgsnd(msgid, &msg, sizeof(/*what goes here*/), 0) == -1) {
+                        if (msgsnd(msgid, &msg,sizeof(msg) - sizeof(long), 0) == -1) {
                             perror("msgsnd");
                             exit(EXIT_FAILURE);
                         }                        
@@ -355,7 +355,7 @@ int main() {
                         sendMsg = true;
                         pcbTable[childIndex].recs.r6 += 1;
                         my_recs.r6--;
-                        if (msgsnd(msgid, &msg, sizeof(/*what goes here*/), 0) == -1) {
+                        if (msgsnd(msgid, &msg,sizeof(msg) - sizeof(long), 0) == -1) {
                             perror("msgsnd");
                             exit(EXIT_FAILURE);
                         }                        
@@ -369,7 +369,7 @@ int main() {
                         sendMsg = true;
                         pcbTable[childIndex].recs.r7 += 1;
                         my_recs.r7--;
-                        if (msgsnd(msgid, &msg, sizeof(/*what goes here*/), 0) == -1) {
+                        if (msgsnd(msgid, &msg,sizeof(msg) - sizeof(long), 0) == -1) {
                             perror("msgsnd");
                             exit(EXIT_FAILURE);
                         }                        
@@ -383,7 +383,7 @@ int main() {
                         sendMsg = true;
                         pcbTable[childIndex].recs.r8 += 1;
                         my_recs.r8--;
-                        if (msgsnd(msgid, &msg, sizeof(/*what goes here*/), 0) == -1) {
+                        if (msgsnd(msgid, &msg,sizeof(msg) - sizeof(long), 0) == -1) {
                             perror("msgsnd");
                             exit(EXIT_FAILURE);
                         }                        
@@ -397,7 +397,7 @@ int main() {
                         sendMsg = true;
                         pcbTable[childIndex].recs.r9 += 1;
                         my_recs.r9--;
-                        if (msgsnd(msgid, &msg, sizeof(/*what goes here*/), 0) == -1) {
+                        if (msgsnd(msgid, &msg,sizeof(msg) - sizeof(long), 0) == -1) {
                             perror("msgsnd");
                             exit(EXIT_FAILURE);
                         }                        
@@ -410,20 +410,48 @@ int main() {
                 
             }else if (msg.action == RELEASE_RESOURCES) {
                 // Release resources
-                bool sendMsg = false;
                 switch (msg.resource) {
-                    case 1:
-                        /* code */
+                    case 0:
+                        pcbTable[childIndex].recs.r0 -= 1;
+                        my_recs.r0++;
                         break;
-                    
-                    default:
+                    case 1:
+                        pcbTable[childIndex].recs.r1 -= 1;
+                        my_recs.r1++;
+                        break;
+                    case 2:
+                        pcbTable[childIndex].recs.r2 -= 1;
+                        my_recs.r2++;
+                        break;
+                    case 3:
+                        pcbTable[childIndex].recs.r3 -= 1;
+                        my_recs.r3++;
+                        break;
+                    case 4:
+                        pcbTable[childIndex].recs.r4 -= 1;
+                        my_recs.r4++;
+                        break;
+                    case 5:
+                        pcbTable[childIndex].recs.r5 -= 1;
+                        my_recs.r5++;
+                        break;
+                    case 6:
+                        pcbTable[childIndex].recs.r6 -= 1;
+                        my_recs.r6++;
+                        break;
+                    case 7:
+                        pcbTable[childIndex].recs.r7 -= 1;
+                        my_recs.r7++;
+                        break;
+                    case 8:
+                        pcbTable[childIndex].recs.r8 -= 1;
+                        my_recs.r8++;
+                        break;
+                    case 9:
+                        pcbTable[childIndex].recs.r9 -= 1;
+                        my_recs.r9++;
                         break;
                 }
-
-                // } else {
-                //     // Error: process trying to release more resources than it owns
-                //     cerr << "Error: process trying to release more resources than it owns. PID: " << msg.pid << endl;
-                // }
             } else if (msg.action == TERMINATE) {
                 // Terminate process
                 waitpid(msg.pid, NULL, 0); // wait for resources to get released and for process to die
@@ -440,36 +468,35 @@ int main() {
                 pcbTable[childIndex].occupied = false;
                 pcbTable[childIndex].pid = 0;
                 pcbTable[childIndex].blocked = -1;
-            // } else {
-            //     cout << "Invalid message received. Action: " << msg.action << endl;
-            }
+            } else {
+                // Check if any blocked processes can be unblocked
+                if (!blocked_queues[msg.resource].empty()) {
+                    int unblockedPid = blocked_queues[msg.resource].front();
+                    blocked_queues[msg.resource].pop();
 
-            // Check blocked queues
-            for (int i = 0; i < 10; ++i) {
-                if (!blocked_queues[i].empty() && activeChildren < MAX_USER_PROCESSES) {
-                    pid_t blocked_pid = blocked_queues[i].front();
-                    int blocked_index = findIndexByPID(pcbTable, blocked_pid);
-
-                    if (blocked_index >= 0) {
-                        // Check if the requested resources are now available
-                        bool resources_available = true;
-                        for (int j = 0; j < 10; ++j) {
-                            if (pcbTable[blocked_index].request[j] > my_resource_descriptor.resources[j]) {
-                                resources_available = false;
-                                break;
-                            }
+                    // Find the unblocked process in the PCB table
+                    int unblockedIndex = -1;
+                    for (int i = 0; i < 18; i++) {
+                        if (pcbTable[i].pid == unblockedPid) {
+                            unblockedIndex = i;
+                            break;
                         }
+                    }
+                }
 
-                        if (resources_available) {
-                            // Grant the requested resources and unblock the process
-                            for (int j = 0; j < 10; ++j) {
-                                my_resource_descriptor.resources[j] -= pcbTable[blocked_index].request[j];
-                                pcbTable[blocked_index].resources[j] += pcbTable[blocked_index].request[j];
-                                pcbTable[blocked_index].request[j] = 0;
-                            }
-                            pcbTable[blocked_index].blocked = -1;
-                            blocked_queues[i].pop();
-                        }
+                // Unblock the process and grant it the resource
+                if (unblockedIndex != -1) {
+                    pcbTable[unblockedIndex].blocked = -1;
+                    pcbTable[unblockedIndex].recs[msg.resource] += 1;
+                    my_recs[msg.resource]--;
+
+                    // Send a message to the unblocked process
+                    msg.mtype = unblockedPid;
+                    msg.resource = msg.resource;
+                    msg.action = GRANT_RESOURCES;
+                    if (msgsnd(msgid, &msg, sizeof(msg) - sizeof(long), 0) == -1) {
+                        perror("msgsnd");
+                        exit(EXIT_FAILURE);
                     }
                 }
             }
