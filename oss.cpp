@@ -501,37 +501,40 @@ int main() {
                 pcbTable[childIndex].pid = 0;
                 pcbTable[childIndex].blocked = -1;
             } else {
-                int unblockedIndex = -1; // Declare unblockedIndex here
-                int unblockedPid;
+                perror("Error: Incorrect message perameters");
+                exit(EXIT_FAILURE);
+            }
 
-                // Check if any blocked processes can be unblocked
-                if (!blocked_queues[msg.resource].empty()) {
-                    unblockedPid = blocked_queues[msg.resource].front();
-                    blocked_queues[msg.resource].pop();
+            int unblockedIndex = -1; // Declare unblockedIndex here
+            int unblockedPid;
 
-                    // Find the unblocked process in the PCB table
-                    for (int i = 0; i < 18; i++) {
-                        if (pcbTable[i].pid == unblockedPid) {
-                            unblockedIndex = i;
-                            break;
-                        }
+            // Check if any blocked processes can be unblocked
+            if (!blocked_queues[msg.resource].empty()) {
+                unblockedPid = blocked_queues[msg.resource].front();
+                blocked_queues[msg.resource].pop();
+
+                // Find the unblocked process in the PCB table
+                for (int i = 0; i < 18; i++) {
+                    if (pcbTable[i].pid == unblockedPid) {
+                        unblockedIndex = i;
+                        break;
                     }
                 }
+            }
 
-                // Unblock the process and grant it the resource
-                if (unblockedIndex != -1) {
-                    pcbTable[unblockedIndex].blocked = -1;
-                    set_resource_value(pcbTable[unblockedIndex].recs, msg.resource, get_resource_value(pcbTable[unblockedIndex].recs, msg.resource) + 1);
-                    set_resource_value(my_recs, msg.resource, get_resource_value(my_recs, msg.resource) - 1);
+            // Unblock the process and grant it the resource
+            if (unblockedIndex != -1) {
+                pcbTable[unblockedIndex].blocked = -1;
+                set_resource_value(pcbTable[unblockedIndex].recs, msg.resource, get_resource_value(pcbTable[unblockedIndex].recs, msg.resource) + 1);
+                set_resource_value(my_recs, msg.resource, get_resource_value(my_recs, msg.resource) - 1);
 
-                    // Send a message to the unblocked process
-                    msg.mtype = unblockedPid;
-                    msg.resource = msg.resource;
-                    msg.action = REQUEST_RESOURCES;
-                    if (msgsnd(msgid, &msg, sizeof(msg) - sizeof(long), 0) == -1) {
-                        perror("msgsnd");
-                        exit(EXIT_FAILURE);
-                    }
+                // Send a message to the unblocked process
+                msg.mtype = unblockedPid;
+                msg.resource = msg.resource;
+                msg.action = REQUEST_RESOURCES;
+                if (msgsnd(msgid, &msg, sizeof(msg) - sizeof(long), 0) == -1) {
+                    perror("msgsnd");
+                    exit(EXIT_FAILURE);
                 }
             }
         }
