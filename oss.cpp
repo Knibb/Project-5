@@ -61,6 +61,59 @@ struct SimulatedClock {
     unsigned int nanoseconds;
 };
 
+vector<int> deadlockDetection(ProcessControlBlock *processTable, resource_descriptor &resources) {
+    ProcessControlBlock tempTable[18];
+    resource_descriptor tempResources = resources;
+    std::vector<int> deadlockedProcesses;
+
+    // Copy the process table to a temporary table
+    for (int i = 0; i < 18; ++i) {
+        tempTable[i] = processTable[i];
+    }
+
+    // Remove non-blocked processes and release their resources
+    for (int i = 0; i < 18; ++i) {
+        if (tempTable[i].blocked == -1) {
+            for (int j = 0; j < 10; ++j) {
+                tempResources.resources[j] += tempTable[i].recs[j];
+                tempTable[i].recs[j] = 0;
+            }
+            tempTable[i].occupied = false;
+        }
+    }
+
+    // Count blocked processes
+    int blockedProcessCount = 0;
+    for (int i = 0; i < 18; ++i) {
+        if (tempTable[i].blocked != -1) {
+            blockedProcessCount++;
+        }
+    }
+
+    // Check if blocked processes can be unblocked by available resources
+    for (int i = 0; i < blockedProcessCount; ++i) {
+        for (int j = 0; j < 18; ++j) {
+            if (tempTable[j].occupied && tempTable[j].blocked != -1 && tempResources.resources[tempTable[j].blocked] > 0) {
+                tempResources.resources[tempTable[j].blocked] -= 1;
+                tempTable[j].blocked = -1;
+                blockedProcessCount--;
+                i = 0; // Reset the outer loop to start over
+                break;
+            }
+        }
+    }
+
+    // Add remaining blocked processes to the deadlockedProcesses vector
+    for (int i = 0; i < 18; ++i) {
+        if (tempTable[i].blocked != -1) {
+            deadlockedProcesses.push_back(tempTable[i].pid);
+        }
+    }
+
+    return deadlockedProcesses;
+}
+
+
 int findEmptyPCBIndex(PCB table[]) {
     for (int i = 0; i < 18; i++) {
         if (table[i].occupied == 0) {
@@ -502,7 +555,7 @@ int main() {
                 pcbTable[childIndex].blocked = -1;
             } else {
                 perror("Error: Incorrect message perameters");
-                exit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);//update later to be a better exit
             }
 
             int unblockedIndex = -1; // Declare unblockedIndex here

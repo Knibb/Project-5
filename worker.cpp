@@ -40,16 +40,9 @@ typedef struct resource_descriptor {
 const int REQUEST_RESOURCES = 1;
 const int RELEASE_RESOURCES = 0;
 const int TERMINATE = -1;
-const int UPDATE_CLOCK = 2; // New message action for clock updates
 const key_t SHM_KEY = 1616; // Shared memory key
-
 int shmid;
 SimulatedClock* simClock;
-
-int grantedRequests = 0;
-int terminatedProcesses = 0;
-int deadlockDetections = 0;
-ofstream logFile;
 
 // Signal handler function for cleanup and termination
 void signalHandler(int signum) {
@@ -62,13 +55,44 @@ void signalHandler(int signum) {
     // Remove shared memory (only if it's the last process using it)
     if (shmctl(shmid, IPC_RMID, NULL) == -1) {
         perror("shmctl");
-    }
-
-    // Close log file
-    logFile.close();
 
     // Terminate the process
     exit(signum);
+    }
+}
+
+// Helper function to increment the appropriate resource field
+void increment_resource(struct resource_descriptor *locRec, int resource) {
+    switch (resource) {
+        case 0: locRec->r0++; break;
+        case 1: locRec->r1++; break;
+        case 2: locRec->r2++; break;
+        case 3: locRec->r3++; break;
+        case 4: locRec->r4++; break;
+        case 5: locRec->r5++; break;
+        case 6: locRec->r6++; break;
+        case 7: locRec->r7++; break;
+        case 8: locRec->r8++; break;
+        case 9: locRec->r9++; break;
+        default: printf("Invalid resource number: %d\n", resource);
+    }
+}
+
+// Helper function to decrement the appropriate resource field
+void decrement_resource(struct resource_descriptor *locRec, int resource) {
+    switch (resource) {
+        case 0: locRec->r0--; break;
+        case 1: locRec->r1--; break;
+        case 2: locRec->r2--; break;
+        case 3: locRec->r3--; break;
+        case 4: locRec->r4--; break;
+        case 5: locRec->r5--; break;
+        case 6: locRec->r6--; break;
+        case 7: locRec->r7--; break;
+        case 8: locRec->r8--; break;
+        case 9: locRec->r9--; break;
+        default: printf("Invalid resource number: %d\n", resource);
+    }
 }
 
 int requestsCounter = 0;
@@ -95,19 +119,6 @@ int main(int argc, char* argv[]) {
     //Setup signal handlers
     signal(SIGINT, signalHandler);
     signal(SIGTERM, signalHandler);
-
-    // Process command-line arguments for log verbosity
-    int logVerbosity = 1; // Default log verbosity level
-    if (argc > 1) {
-        logVerbosity = atoi(argv[1]);
-    }
-
-    // Open log file for writing
-    logFile.open("worker_log.txt", ios::out | ios::app);
-    if (!logFile.is_open()) {
-        perror("Failed to open worker_log.txt");
-        exit(EXIT_FAILURE);
-    }
 
     // Connect to the message queue
     key_t msg_key = ftok("oss_mq.txt", 1);
@@ -157,20 +168,19 @@ int main(int argc, char* argv[]) {
 
         // Randomly decide between requesting resources, releasing resources, or terminating
         int rand_decision = rand() % 100;
-        
 
         if (rand_decision < 80) { // 80% chance of requesting resources
             msg.action = REQUEST_RESOURCES;
             msg.resource = rand() % 10; // Randomly choose a resource from r0 to r9
-            int maxRequest = maxResourceInstances[msg.resource] - allocatedResources[msg.resource];
-            msg.amount = rand() % maxRequest + 1; // Request a random amount of resources within the allowed limit
+            msg.amount = 1; // Request one resource
         } else if (rand_decision < 95) { // 15% chance of releasing resources
             msg.action = RELEASE_RESOURCES;
             msg.resource = rand() % 10; // Randomly choose a resource from r0 to r9
-            msg.amount = rand() % (allocatedResources[msg.resource] + 1); // Release a random amount of allocated resources
+            msg.amount = 1; // Release one resource
         } else { // 5% chance of terminating
             msg.action = TERMINATE;
         }
+
 
         // Send the message to the parent process (oss)
         if (msgsnd(msqid, &msg, sizeof(msg) - sizeof(long), 0) == -1) {
@@ -187,64 +197,25 @@ int main(int argc, char* argv[]) {
 
         // Process the reply
         if (reply.action == REQUEST_RESOURCES) {
-            allocatedResources[reply.resource] += reply.amount;
-            grantedRequests++;
-            requestsCounter++;
-            if (logVerbosity > 1) {
-                logFile << "Worker " << pid << ": Granted request for resource " << reply.resource << ", amount: " << reply.amount << endl;
-            }
-
-            // Output the allocated resources table every 20 granted requests
-            if (requestsCounter % 20 == 0) {
-                logFile << "Allocated Resources Table for Worker " << pid << ":\n";
-                logFile << "Resource\tAmount\n";
-                for (int i = 0; i < 10; i++) {
-                    logFile << "r" << i << "\t\t" << allocatedResources[i] << "\n";
-                }
-                logFile << endl;
-            }
+            increment_resource(&locRec, reply.resource);
 
         }else if (reply.action == RELEASE_RESOURCES) {
-            allocatedResources[reply.resource] -= reply.amount;
-            if (logVerbosity > 1) {
-                logFile << "Worker " << pid << ": Released resource " << reply.resource << ", amount: " << reply.amount << endl;
-            }
+            decrement_resource(&locRec, reply.resource);
+            
         } else if (reply.action == TERMINATE) {
-            terminated = true;
-            terminatedProcesses++;
-            if (logVerbosity > 0) {
-                logFile << "Worker " << pid << ": Terminated" << endl;
+            // Detach from shared memory before exiting normally
+            if (shmdt(simClock) == -1) {
+                perror("shmdt");
+                exit(EXIT_SUCCESS);
             }
         }
-    }
-
-    // Print the table of allocated resources if the log verbosity is set to the highest level (3)
-    if (logVerbosity > 2) {
-        logFile << "Allocated Resources Table for Worker " << pid << ":\n";
-        logFile << "Resource\tAmount\n";
-        for (int i = 0; i < 10; i++) {
-            logFile << "r" << i << "\t\t" << allocatedResources[i] << "\n";
-        }
-        logFile << endl;
-    }
-
-    } // End of while loop
-
-    // Output statistics
-    logFile << "Worker " << pid << " Statistics:\n";
-    logFile << "Granted Requests: " << grantedRequests << "\n";
-    logFile << "Terminated Processes: " << terminatedProcesses << "\n";
-    logFile << "Deadlock Detections: " << deadlockDetections << "\n";
-    logFile << endl;
+    } 
 
     // Detach from shared memory before exiting normally
     if (shmdt(simClock) == -1) {
         perror("shmdt");
         exit(EXIT_FAILURE);
     }
-
-    // Close log file
-    logFile.close();
 
     return 0;
 }
