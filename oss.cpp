@@ -176,6 +176,15 @@ void set_resource_value(resource_descriptor& rd, int index, int value) {
     }
 }
 
+int findEmptyPCBIndex(PCB pcbTable[], int tableSize) {
+    for (int i = 0; i < tableSize; ++i) {
+        if (pcbTable[i].occupied == false) {
+            return i;
+        }
+    }
+    return -1; // All entries are occupied
+}
+
 const int SHM_SIZE = sizeof(SimulatedClock) + MAX_USER_PROCESSES * sizeof(PCB);
 
 int main() {
