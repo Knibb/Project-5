@@ -313,7 +313,7 @@ int main() {
         }
     
         // Check if it's time to fork a new child process
-        if (simClock->nanoseconds >= nextForkTime && findEmptyPCBIndex(pcbTabl, 18) != -1) {
+        if (simClock->nanoseconds >= nextForkTime && findEmptyPCBIndex(pcbTable, 18) != -1) {
            pid_t pid = fork();
             
             if (pid < 0) {
