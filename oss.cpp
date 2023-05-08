@@ -64,7 +64,7 @@ struct SimulatedClock {
 vector<int> deadlockDetection(ProcessControlBlock *processTable, resource_descriptor resources) {
     ProcessControlBlock tempTable[18];
     resource_descriptor tempResources = resources;
-    std::vector<int> deadlockedProcesses;
+    vector<int> deadlockedProcesses;
 
     // Copy the process table to a temporary table
     for (int i = 0; i < 18; ++i) {
@@ -100,7 +100,6 @@ vector<int> deadlockDetection(ProcessControlBlock *processTable, resource_descri
                 }
                 tempTable[j].blocked = -1;
                 blockedProcessCount--;
-                i = 0; // Reset the outer loop to start over
                 break;
             }
         }
@@ -115,48 +114,6 @@ vector<int> deadlockDetection(ProcessControlBlock *processTable, resource_descri
 
     return deadlockedProcesses;
 }
-
-void deadlockRecovery(ProcessControlBlock *pcbTable, Resource &my_recs, int victimIndex) {
-    if (victimIndex < 0 || victimIndex >= MAX_USER_PROCESSES) {
-        cerr << "Error: Invalid victim index for deadlock recovery" << endl;
-        return;
-    }
-
-    // Terminate the victim process
-    pid_t victimPid = pcbTable[victimIndex].pid;
-    if (kill(victimPid, SIGTERM) == -1) {
-        perror("kill");
-        exit(EXIT_FAILURE);
-    }
-
-    // Wait for the victim process to terminate (non-blocking)
-    int status;
-    pid_t pid;
-    do {
-        pid = waitpid(victimPid, &status, WNOHANG);
-        if (pid == -1) {
-            perror("waitpid");
-            exit(EXIT_FAILURE);
-        }
-        if (pid != 0) {
-            // Reallocate the victim's resources back to the available pool
-            for (int i = 0; i < 10; ++i) {
-                set_resource_value(my_recs, i, get_resource_value(my_recs, i) + get_resource_value(pcbTable[victimIndex].recs, i));
-                set_resource_value(pcbTable[victimIndex].recs, i, 0);
-            }
-
-            // Mark the PCB entry as unoccupied
-            pcbTable[victimIndex].occupied = false;
-            pcbTable[victimIndex].pid = 0;
-            pcbTable[victimIndex].blocked = -1;
-        } else {
-            // The child process has not terminated yet, perform other tasks or sleep for a short duration
-            // usleep(100000); // sleep for 100 ms (optional)
-        }
-    } while (pid == 0);
-}
-
-
 
 int findEmptyPCBIndex(PCB table[]) {
     for (int i = 0; i < 18; i++) {
@@ -593,7 +550,7 @@ int main() {
                 }
             } else if (msg.action == TERMINATE) {
                 // Terminate process
-                waitpid(msg.pid, NULL, 0); // wait for resources to get released and for process to die
+                wait(NULL); // wait for resources to get released and for process to die
                 terminatedChildren++;
                 activeChildren--;
 
@@ -646,6 +603,34 @@ int main() {
             }
         }
         deadlockDetection(pcbTable, my_recs, blocked_queues);
+
+        vector<int> deadlockedPids = deadlockDetection(processTable, resources);
+
+        for (int i = 0; i < deadlockedPids.size(); i++) {
+            int deadlockedPid = deadlockedPids[i];
+
+            msg.mtype = deadlockedPid;
+            msg.action = -1;
+
+            if (msgsnd(msgid, &msg, sizeof(msg) - sizeof(long), 0) == -1) {
+                perror("msgsnd");
+                exit(EXIT_FAILURE);
+            }
+
+            // Free up resources held by the process with deadlockedPid
+            for (int j = 0; j < 10; ++j) {
+                resources.resources[j] += processTable[deadlockedPid].recs[j];
+                processTable[deadlockedPid].recs[j] = 0;
+            }
+
+            // Remove the process with deadlockedPid from the process table
+            processTable[deadlockedPid].occupied = false;
+            processTable[deadlockedPid].pid = -1;
+            processTable[deadlockedPid].blocked = -1;
+
+            // Wait for the child process to terminate
+            wait(NULL);
+        }
     }
     
     while (activeChildren > 0) {
