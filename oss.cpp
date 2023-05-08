@@ -74,11 +74,17 @@ vector<int> deadlockDetection(PCB processTable[], resource_descriptor resources)
     // Remove non-blocked processes and release their resources
     for (int i = 0; i < 18; ++i) {
         if (tempTable[i].blocked == -1) {
-            for (int j = 0; j < 10; ++j) {
-                int resource_value = get_resource_value(tempResources, j);
-                resource_value += get_resource_value(tempTable[i].recs, j);
-                tempTable[i].recs = 0;
-            }
+            tempResources.r0 += tempTable[i].recs.r0;
+            tempResources.r1 += tempTable[i].recs.r1;
+            tempResources.r2 += tempTable[i].recs.r2;
+            tempResources.r3 += tempTable[i].recs.r3;
+            tempResources.r4 += tempTable[i].recs.r4;
+            tempResources.r5 += tempTable[i].recs.r5;
+            tempResources.r6 += tempTable[i].recs.r6;
+            tempResources.r7 += tempTable[i].recs.r7;
+            tempResources.r8 += tempTable[i].recs.r8;
+            tempResources.r9 += tempTable[i].recs.r9;
+            tempTable[i].recs = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
             tempTable[i].occupied = false;
         }
     }
@@ -94,15 +100,36 @@ vector<int> deadlockDetection(PCB processTable[], resource_descriptor resources)
     // Check if blocked processes can be unblocked by available resources
     for (int i = 0; i < blockedProcessCount; ++i) {
         for (int j = 0; j < 18; ++j) {
-            if (tempTable[j].occupied && tempTable[j].blocked != -1 && get_resource_value(tempResources, tempTable[j].blocked) > 0) {
-                // Release the resources held by the unblocked process
-                for (int k = 0; k < 10; ++k) {
-                    int resource_value = get_resource_value(tempResources, k);
-                    resource_value += get_resource_value(tempTable[j].recs, k);
+            if (tempTable[j].occupied && tempTable[j].blocked != -1) {
+                int required_resource = tempTable[j].blocked;
+                int available_resource = 0;
+                switch (required_resource) {
+                    case 0: available_resource = tempResources.r0; break;
+                    case 1: available_resource = tempResources.r1; break;
+                    case 2: available_resource = tempResources.r2; break;
+                    case 3: available_resource = tempResources.r3; break;
+                    case 4: available_resource = tempResources.r4; break;
+                    case 5: available_resource = tempResources.r5; break;
+                    case 6: available_resource = tempResources.r6; break;
+                    case 7: available_resource = tempResources.r7; break;
+                    case 8: available_resource = tempResources.r8; break;
+                    case 9: available_resource = tempResources.r9; break;
                 }
-                tempTable[j].blocked = -1;
-                blockedProcessCount--;
-                break;
+                if (available_resource > 0) {
+                    tempResources.r0 += tempTable[j].recs.r0;
+                    tempResources.r1 += tempTable[j].recs.r1;
+                    tempResources.r2 += tempTable[j].recs.r2;
+                    tempResources.r3 += tempTable[j].recs.r3;
+                    tempResources.r4 += tempTable[j].recs.r4;
+                    tempResources.r5 += tempTable[j].recs.r5;
+                    tempResources.r6 += tempTable[j].recs.r6;
+                    tempResources.r7 += tempTable[j].recs.r7;
+                    tempResources.r8 += tempTable[j].recs.r8;
+                    tempResources.r9 += tempTable[j].recs.r9;
+                    tempTable[j].blocked = -1;
+                    blockedProcessCount--;
+                    break;
+                }
             }
         }
     }
@@ -115,16 +142,6 @@ vector<int> deadlockDetection(PCB processTable[], resource_descriptor resources)
     }
 
     return deadlockedProcesses;
-}
-
-
-int findEmptyPCBIndex(PCB table[]) {
-    for (int i = 0; i < 18; i++) {
-        if (table[i].occupied == 0) {
-            return i;
-        }
-    }
-    return (-1);
 }
 
 int get_resource_value(resource_descriptor& rd, int index) {
