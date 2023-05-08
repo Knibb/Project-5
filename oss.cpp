@@ -648,7 +648,7 @@ int main() {
 
             // Free up resources held by the process with deadlockedPid
             for (int j = 0; j < 10; j++) {
-                resources.resources[j] += pcbTable[deadlockedPid].recs[j];
+                my_recs.resources[j] += pcbTable[deadlockedPid].recs[j];
                 pcbTable[deadlockedPid].recs[j] = 0;
             }
 
