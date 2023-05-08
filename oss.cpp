@@ -75,8 +75,9 @@ vector<int> deadlockDetection(PCB processTable[], resource_descriptor resources)
     for (int i = 0; i < 18; ++i) {
         if (tempTable[i].blocked == -1) {
             for (int j = 0; j < 10; ++j) {
-                tempResources.resources[j] += tempTable[i].recs[j];
-                tempTable[i].recs[j] = 0;
+                int resource_value = get_resource_value(tempResources, j);
+                resource_value += get_resource_value(tempTable[i].recs, j);
+                tempTable[i].recs = 0;
             }
             tempTable[i].occupied = false;
         }
@@ -93,10 +94,11 @@ vector<int> deadlockDetection(PCB processTable[], resource_descriptor resources)
     // Check if blocked processes can be unblocked by available resources
     for (int i = 0; i < blockedProcessCount; ++i) {
         for (int j = 0; j < 18; ++j) {
-            if (tempTable[j].occupied && tempTable[j].blocked != -1 && tempResources.resources[tempTable[j].blocked] > 0) {
+            if (tempTable[j].occupied && tempTable[j].blocked != -1 && get_resource_value(tempResources, tempTable[j].blocked) > 0) {
                 // Release the resources held by the unblocked process
                 for (int k = 0; k < 10; ++k) {
-                    tempResources.resources[k] += tempTable[j].recs[k];
+                    int resource_value = get_resource_value(tempResources, k);
+                    resource_value += get_resource_value(tempTable[j].recs, k);
                 }
                 tempTable[j].blocked = -1;
                 blockedProcessCount--;
@@ -114,6 +116,7 @@ vector<int> deadlockDetection(PCB processTable[], resource_descriptor resources)
 
     return deadlockedProcesses;
 }
+
 
 int findEmptyPCBIndex(PCB table[]) {
     for (int i = 0; i < 18; i++) {
