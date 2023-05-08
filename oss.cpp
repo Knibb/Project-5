@@ -197,6 +197,7 @@ int main() {
     int MAX_TERMINATED = 40;
     bool verbose = false;
     
+    
     PCB pcbTable[18];
     for (int i = 0; i < 18; i++)
     {
@@ -217,6 +218,7 @@ int main() {
         pcbTable[i].recs.r9 = 0;
     }
     
+    int findEmptyPCBIndex(PCB pcbTable[], int tableSize)
 
     if ((msg_key = ftok("oss_mq.txt", 1)) == -1) {
         perror("msg_q ftok error");
@@ -311,7 +313,7 @@ int main() {
         }
     
         // Check if it's time to fork a new child process
-        if (simClock->nanoseconds >= nextForkTime && findEmptyPCBIndex(pcbTable) != -1) {
+        if (simClock->nanoseconds >= nextForkTime && findEmptyPCBIndex(pcbTabl, 18) != -1) {
            pid_t pid = fork();
             
             if (pid < 0) {
@@ -334,7 +336,7 @@ int main() {
                 children_created++;
 
                 // Update the PCB table for the new child process
-                int childIndex = findEmptyPCBIndex(pcbTable);
+                int childIndex = findEmptyPCBIndex(pcbTable, 18);
                 if (childIndex >= 0) {
                     pcbTable[childIndex].occupied = true;
                     pcbTable[childIndex].pid = pid;
