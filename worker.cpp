@@ -44,23 +44,6 @@ const key_t SHM_KEY = 1616; // Shared memory key
 int shmid;
 SimulatedClock* simClock;
 
-// Signal handler function for cleanup and termination
-void signalHandler(int signum) {
-    // Detach from shared memory
-    if (shmdt(simClock) == -1) {
-        perror("shmdt");
-        exit(EXIT_FAILURE);
-    }
-
-    // Remove shared memory (only if it's the last process using it)
-    if (shmctl(shmid, IPC_RMID, NULL) == -1) {
-        perror("shmctl");
-
-    // Terminate the process
-    exit(signum);
-    }
-}
-
 // Helper function to increment the appropriate resource field
 void increment_resource(struct resource_descriptor *locRec, int resource) {
     switch (resource) {
@@ -116,9 +99,7 @@ int main(int argc, char* argv[]) {
     locRec.r9 = 0;
 
 
-    //Setup signal handlers
-    signal(SIGINT, signalHandler);
-    signal(SIGTERM, signalHandler);
+
 
     // Connect to the message queue
     key_t msg_key = ftok("oss_mq.txt", 1);
