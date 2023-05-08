@@ -61,50 +61,7 @@ struct SimulatedClock {
     unsigned int nanoseconds;
 };
 
-int findEmptyPCBIndex(PCB table[]) {
-    for (int i = 0; i < 18; i++) {
-        if (table[i].occupied == 0) {
-            return i;
-        }
-    }
-    return (-1);
-}
-
-int get_resource_value(resource_descriptor& rd, int index) {
-    switch (index) {
-        case 0: return rd.r0;
-        case 1: return rd.r1;
-        case 2: return rd.r2;
-        case 3: return rd.r3;
-        case 4: return rd.r4;
-        case 5: return rd.r5;
-        case 6: return rd.r6;
-        case 7: return rd.r7;
-        case 8: return rd.r8;
-        case 9: return rd.r9;
-        default: return -1; // Error case
-    }
-}
-
-void set_resource_value(resource_descriptor& rd, int index, int value) {
-    switch (index) {
-        case 0: rd.r0 = value; break;
-        case 1: rd.r1 = value; break;
-        case 2: rd.r2 = value; break;
-        case 3: rd.r3 = value; break;
-        case 4: rd.r4 = value; break;
-        case 5: rd.r5 = value; break;
-        case 6: rd.r6 = value; break;
-        case 7: rd.r7 = value; break;
-        case 8: rd.r8 = value; break;
-        case 9: rd.r9 = value; break;
-        default: break; // Error case, do nothing
-    }
-}
-
-const int SHM_SIZE = sizeof(SimulatedClock) + MAX_USER_PROCESSES * sizeof(PCB);
-
-vector<int> deadlockDetection(ProcessControlBlock *processTable, resource_descriptor resources) {
+vector<int> deadlockDetection(PCB *processTable[], resource_descriptor resources) {
     ProcessControlBlock tempTable[18];
     resource_descriptor tempResources = resources;
     vector<int> deadlockedProcesses;
@@ -157,6 +114,49 @@ vector<int> deadlockDetection(ProcessControlBlock *processTable, resource_descri
 
     return deadlockedProcesses;
 }
+
+int findEmptyPCBIndex(PCB table[]) {
+    for (int i = 0; i < 18; i++) {
+        if (table[i].occupied == 0) {
+            return i;
+        }
+    }
+    return (-1);
+}
+
+int get_resource_value(resource_descriptor& rd, int index) {
+    switch (index) {
+        case 0: return rd.r0;
+        case 1: return rd.r1;
+        case 2: return rd.r2;
+        case 3: return rd.r3;
+        case 4: return rd.r4;
+        case 5: return rd.r5;
+        case 6: return rd.r6;
+        case 7: return rd.r7;
+        case 8: return rd.r8;
+        case 9: return rd.r9;
+        default: return -1; // Error case
+    }
+}
+
+void set_resource_value(resource_descriptor& rd, int index, int value) {
+    switch (index) {
+        case 0: rd.r0 = value; break;
+        case 1: rd.r1 = value; break;
+        case 2: rd.r2 = value; break;
+        case 3: rd.r3 = value; break;
+        case 4: rd.r4 = value; break;
+        case 5: rd.r5 = value; break;
+        case 6: rd.r6 = value; break;
+        case 7: rd.r7 = value; break;
+        case 8: rd.r8 = value; break;
+        case 9: rd.r9 = value; break;
+        default: break; // Error case, do nothing
+    }
+}
+
+const int SHM_SIZE = sizeof(SimulatedClock) + MAX_USER_PROCESSES * sizeof(PCB);
 
 int main() {
     
