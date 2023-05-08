@@ -648,14 +648,14 @@ int main() {
 
             // Free up resources held by the process with deadlockedPid
             for (int j = 0; j < 10; j++) {
-                resources.resources[j] += processTable[deadlockedPid].recs[j];
-                processTable[deadlockedPid].recs[j] = 0;
+                resources.resources[j] += pcbTable[deadlockedPid].recs[j];
+                pcbTable[deadlockedPid].recs[j] = 0;
             }
 
             // Remove the process with deadlockedPid from the process table
-            processTable[deadlockedPid].occupied = false;
-            processTable[deadlockedPid].pid = -1;
-            processTable[deadlockedPid].blocked = -1;
+            pcbTable[deadlockedPid].occupied = false;
+            pcbTable[deadlockedPid].pid = -1;
+            pcbTable[deadlockedPid].blocked = -1;
 
             // Wait for the child process to terminate
             wait(NULL);
