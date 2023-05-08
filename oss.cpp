@@ -62,7 +62,7 @@ struct SimulatedClock {
 };
 
 vector<int> deadlockDetection(PCB *processTable[], resource_descriptor resources) {
-    ProcessControlBlock tempTable[18];
+    PCB tempTable[18];
     resource_descriptor tempResources = resources;
     vector<int> deadlockedProcesses;
 
