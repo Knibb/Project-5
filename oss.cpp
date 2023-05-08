@@ -647,10 +647,21 @@ int main() {
             }
 
             // Free up resources held by the process with deadlockedPid
-            for (int j = 0; j < 10; j++) {
-                my_recs.resources[j] += pcbTable[deadlockedPid].recs[j];
-                pcbTable[deadlockedPid].recs[j] = 0;
+            for (int j = 0; j < 10; ++j) {
+                switch (j) {
+                    case 0: my_recs.r0 += pcbTable[deadlockedPid].recs.r0; pcbTable[deadlockedPid].recs.r0 = 0; break;
+                    case 1: my_recs.r1 += pcbTable[deadlockedPid].recs.r1; pcbTable[deadlockedPid].recs.r1 = 0; break;
+                    case 2: my_recs.r2 += pcbTable[deadlockedPid].recs.r2; pcbTable[deadlockedPid].recs.r2 = 0; break;
+                    case 3: my_recs.r3 += pcbTable[deadlockedPid].recs.r3; pcbTable[deadlockedPid].recs.r3 = 0; break;
+                    case 4: my_recs.r4 += pcbTable[deadlockedPid].recs.r4; pcbTable[deadlockedPid].recs.r4 = 0; break;
+                    case 5: my_recs.r5 += pcbTable[deadlockedPid].recs.r5; pcbTable[deadlockedPid].recs.r5 = 0; break;
+                    case 6: my_recs.r6 += pcbTable[deadlockedPid].recs.r6; pcbTable[deadlockedPid].recs.r6 = 0; break;
+                    case 7: my_recs.r7 += pcbTable[deadlockedPid].recs.r7; pcbTable[deadlockedPid].recs.r7 = 0; break;
+                    case 8: my_recs.r8 += pcbTable[deadlockedPid].recs.r8; pcbTable[deadlockedPid].recs.r8 = 0; break;
+                    case 9: my_recs.r9 += pcbTable[deadlockedPid].recs.r9; pcbTable[deadlockedPid].recs.r9 = 0; break;
+                }
             }
+
 
             // Remove the process with deadlockedPid from the process table
             pcbTable[deadlockedPid].occupied = false;
