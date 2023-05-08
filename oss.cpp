@@ -218,10 +218,9 @@ int main() {
         pcbTable[i].recs.r9 = 0;
     }
     
-    int findEmptyPCBIndex(PCB pcbTable[], int tableSize)
+    int findEmptyPCBIndex(PCB pcbTable[], int tableSize);
 
-    msg_key = ftok("oss_mq.txt", 1);
-    if (msg_key == -1) {
+    if ((msg_key = ftok("oss_mq.txt", 1)) == -1) {
         perror("msg_q ftok error");
         exit(EXIT_FAILURE);
     }
