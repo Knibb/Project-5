@@ -220,7 +220,7 @@ int main() {
     
     int findEmptyPCBIndex(PCB pcbTable[], int tableSize)
 
-    msg_key = ftok("oss_mq.txt", 1)
+    msg_key = ftok("oss_mq.txt", 1);
     if (msg_key == -1) {
         perror("msg_q ftok error");
         exit(EXIT_FAILURE);
