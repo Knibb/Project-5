@@ -633,9 +633,7 @@ int main() {
                 }
             }
         }
-        deadlockDetection(pcbTable, my_recs, blocked_queues);
-
-        vector<int> deadlockedPids = deadlockDetection(processTable, resources);
+        vector<int> deadlockedPids = deadlockDetection(pcbTable, my_recs, blocked_queues);
 
         for (int i = 0; i < deadlockedPids.size(); i++) {
             int deadlockedPid = deadlockedPids[i];
@@ -649,7 +647,7 @@ int main() {
             }
 
             // Free up resources held by the process with deadlockedPid
-            for (int j = 0; j < 10; ++j) {
+            for (int j = 0; j < 10; j++) {
                 resources.resources[j] += processTable[deadlockedPid].recs[j];
                 processTable[deadlockedPid].recs[j] = 0;
             }
