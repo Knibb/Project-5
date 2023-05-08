@@ -61,7 +61,7 @@ struct SimulatedClock {
     unsigned int nanoseconds;
 };
 
-vector<int> deadlockDetection(PCB processTable[], resource_descriptor resources) {
+vector<int> deadlockDetection(PCB processTable[], resource_descriptor resources, const vector<int>& blocked_queues) {
     PCB tempTable[18];
     resource_descriptor tempResources = resources;
     vector<int> deadlockedProcesses;
