@@ -27,7 +27,6 @@ const int MAX_REC = 20;
 const int MAX_USER_PROCESSES = 18;
 const int MAX_RUNTIME = 5;
 const key_t SHM_KEY = 1616; // Shared memory key
-const int SHM_SIZE = sizeof(SimulatedClock) + MAX_USER_PROCESSES * sizeof(PCB);
 
 typedef struct msgbuffer {
     long mtype;
@@ -191,6 +190,7 @@ void log_message(FILE *logfile, bool verbose_mode, bool is_verbose, const char *
     }
 }
 
+const int SHM_SIZE = sizeof(SimulatedClock) + MAX_USER_PROCESSES * sizeof(PCB);
 
 int main(int argc, char *argv[]) {
     
