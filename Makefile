@@ -1,8 +1,8 @@
 CC=g++
 CFLAGS=-std=c++11 -pthread
 DEPS=
-OBJ_OSS=oss.o resource_descriptor.o
-OBJ_WORKER=worker.o resource_descriptor.o
+OBJ_OSS=oss.o
+OBJ_WORKER=worker.o
 
 %.o: %.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
