@@ -73,6 +73,7 @@ int requestsCounter = 0;
 int main(int argc, char* argv[]) {
     srand(time(NULL));
     int pid = getpid();
+    lo
 
     struct resource_descriptor locRec;
 
@@ -161,7 +162,9 @@ int main(int argc, char* argv[]) {
 
         // Wait for a message back indicating the request was granted before continuing
         msgbuffer reply;
-        if (msgrcv(msqid, &reply, sizeof(reply) - sizeof(long), pid, 0) == -1) {
+        reply.mtype = getppid();
+
+        if (msgrcv(msqid, &reply, sizeof(msgbuffer) - sizeof(long), pid, 0) == -1) {
             perror("msgrcv");
             exit(EXIT_FAILURE);
         }
