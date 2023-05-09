@@ -4,6 +4,8 @@ DEPS=
 OBJ_OSS=oss.o
 OBJ_WORKER=worker.o
 
+all: oss worker
+
 %.o: %.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
