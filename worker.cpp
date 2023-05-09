@@ -6,6 +6,7 @@
 #include <sys/shm.h>
 #include <sys/msg.h>
 #include <signal.h>
+#include <unistd.h>
 #include "resource_descriptor.h"
 
 
@@ -25,19 +26,6 @@ struct SimulatedClock {
     unsigned int seconds;
     unsigned int nanoseconds;
 };
-
-typedef struct resource_descriptor {
-    int r0;
-    int r1;
-    int r2;
-    int r3;
-    int r4;
-    int r5;
-    int r6;
-    int r7;
-    int r8;
-    int r9;
-}resource_descriptor;
 
 const int REQUEST_RESOURCES = 1;
 const int RELEASE_RESOURCES = 0;
@@ -117,7 +105,7 @@ int main(int argc, char* argv[]) {
         perror("shmget");
         exit(EXIT_FAILURE);
     }
-    SimulatedClock* simClock = (SimulatedClock*)shmat(shmid, nullptr, 0);
+    SimulatedClock* simClock = (SimulatedClock*)shmat(shmid, NULL, 0);
 
     SimulatedClock startTime = *simClock;
     bool terminated = false;
