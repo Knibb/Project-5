@@ -27,6 +27,7 @@ const int MAX_REC = 20;
 const int MAX_USER_PROCESSES = 18;
 const int MAX_RUNTIME = 5;
 const key_t SHM_KEY = 1616; // Shared memory key
+const int SHM_SIZE = sizeof(SimulatedClock) + MAX_USER_PROCESSES * sizeof(PCB);
 
 typedef struct msgbuffer {
     long mtype;
@@ -174,9 +175,24 @@ int findEmptyPCBIndex(PCB pcbTable[], int tableSize) {
     return -1; // All entries are occupied
 }
 
-const int SHM_SIZE = sizeof(SimulatedClock) + MAX_USER_PROCESSES * sizeof(PCB);
+unsigned int log_lines = 0;
+const unsigned int MAX_LOG_LINES = 100000;
 
-int main() {
+void log_message(FILE *logfile, bool verbose_mode, bool is_verbose, const char *format, ...) {
+    if (log_lines >= MAX_LOG_LINES) {
+        return;
+    }
+    if (verbose_mode || !is_verbose) {
+        va_list args;
+        va_start(args, format);
+        vfprintf(logfile, format, args);
+        va_end(args);
+        log_lines++;
+    }
+}
+
+
+int main(int argc, char *argv[]) {
     
     time_t startTime = time(NULL);
     system("touch oss_mq.txt");
@@ -184,9 +200,28 @@ int main() {
     key_t msg_key;
     msgbuffer msg;
     int MAX_TERMINATED = 40;
+    int opt;
     bool verbose = false;
     
-    
+    while ((opt = getopt(argc, argv, "v")) != -1) {
+        switch (opt) {
+            case 'v':
+                verbose = true;
+                break;
+            default:
+                fprintf(stderr, "Usage: %s [-v]\n", argv[0]);
+                exit(EXIT_FAILURE);
+                break;
+        }
+    }
+
+    FILE *logfile = fopen("logfile.txt", "w");
+    if (logfile == NULL) {
+        perror("fopen");
+        exit(EXIT_FAILURE);
+    }
+
+
     PCB pcbTable[18];
     for (int i = 0; i < 18; i++)
     {
@@ -381,7 +416,9 @@ int main() {
                         if (msgsnd(msgid, &msg,sizeof(msg) - sizeof(long), 0) == -1) {
                             perror("msgsnd");
                             exit(EXIT_FAILURE);
-                        }                        
+                        }
+
+                        log_message(logfile, verbose, true, "Master granting P%d request R%d at time %d:%d\n", /* ... */);                
                     } else {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
@@ -624,6 +661,9 @@ int main() {
         }
         vector<int> deadlockedPids = deadlockDetection(pcbTable, my_recs, blocked_queues);
 
+        // Log a message when deadlock detection is run
+        log_message(logfile, verbose, false, "Master running deadlock detection at time %d:%d: No deadlocks detected\n");
+
         for (int i = 0; i < deadlockedPids.size(); i++) {
             int deadlockedPid = deadlockedPids[i];
 
@@ -659,6 +699,9 @@ int main() {
 
             // Wait for the child process to terminate
             wait(NULL);
+
+            // Log a message when a process is terminated to resolve a deadlock
+            log_message(logfile, verbose, false, "Master terminating P%d to remove deadlock\n", /* ... */);
         }
     }
     
@@ -691,6 +734,9 @@ int main() {
         perror("msgctl");
         exit(EXIT_FAILURE);
     }
+
+    //close logfile
+    fclose(logfile);
 
     return 0;
 }
