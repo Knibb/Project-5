@@ -6,6 +6,8 @@
 #include <sys/shm.h>
 #include <sys/msg.h>
 #include <signal.h>
+#include "resource_descriptor.h"
+
 
 using namespace std;
 

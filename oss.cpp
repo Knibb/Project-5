@@ -16,6 +16,8 @@
 #include <sys/shm.h>
 #include <sys/msg.h>
 #include <sys/wait.h>
+#include "resource_descriptor.h"
+
 
 using namespace std;
 
@@ -33,19 +35,6 @@ typedef struct msgbuffer {
     int pid;
     int amount;
 }msgbuffer;
-
-typedef struct resource_descriptor {
-    int r0;
-    int r1;
-    int r2;
-    int r3;
-    int r4;
-    int r5;
-    int r6;
-    int r7;
-    int r8;
-    int r9;
-}resource_descriptor;
 
 typedef struct PCB {
     int occupied; // either true or false
