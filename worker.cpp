@@ -73,7 +73,6 @@ int requestsCounter = 0;
 int main(int argc, char* argv[]) {
     srand(time(NULL));
     int pid = getpid();
-    lo
 
     struct resource_descriptor locRec;
 
