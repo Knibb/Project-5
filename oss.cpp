@@ -410,21 +410,22 @@ int main(int argc, char *argv[]) {
                 bool sendMsg = false;
                 switch (msg.resource) {
                     case 0:
-                    if (my_recs.r0 > 0){
-                        sendMsg = true;
-                        pcbTable[childIndex].recs.r0 += 1;
-                        my_recs.r0--;
-                        if (msgsnd(msgid, &msg,sizeof(msg) - sizeof(long), 0) == -1) {
-                            perror("msgsnd");
-                            exit(EXIT_FAILURE);
+                        if (my_recs.r0 > 0){
+                            sendMsg = true;
+                            pcbTable[childIndex].recs.r0 += 1;
+                            my_recs.r0--;
+                            if (msgsnd(msgid, &msg,sizeof(msg) - sizeof(long), 0) == -1) {
+                                perror("msgsnd");
+                                exit(EXIT_FAILURE);
+                            }
+                            log_message(logfile, verbose, true, "Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 0, simClock->seconds, simClock->nanoseconds);
+                            break;              
+                        } else {
+                            // Not enough resources available, block the process
+                            pcbTable[childIndex].blocked = msg.resource;
+                            blocked_queues[msg.resource].push(msg.pid);
+                            break;
                         }
-                        log_message(logfile, verbose, true, "Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 0, simClock->seconds, simClock->nanoseconds);
-                        break;              
-                    } else {
-                        // Not enough resources available, block the process
-                        pcbTable[childIndex].blocked = msg.resource;
-                        blocked_queues[msg.resource].push(msg.pid);
-                    }
                     case 1:
                     if (my_recs.r1 > 0){
                         sendMsg = true;
@@ -440,6 +441,7 @@ int main(int argc, char *argv[]) {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
                         blocked_queues[msg.resource].push(msg.pid);
+                        break;
                     }
                     case 2:
                     if (my_recs.r2 > 0){
@@ -456,6 +458,7 @@ int main(int argc, char *argv[]) {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
                         blocked_queues[msg.resource].push(msg.pid);
+                        break;
                     }
                     case 3:
                     if (my_recs.r3 > 0){
@@ -472,6 +475,7 @@ int main(int argc, char *argv[]) {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
                         blocked_queues[msg.resource].push(msg.pid);
+                        break;
                     }
                     case 4:
                     if (my_recs.r4 > 0){
@@ -488,6 +492,7 @@ int main(int argc, char *argv[]) {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
                         blocked_queues[msg.resource].push(msg.pid);
+                        break;
                     }
                     case 5:
                     if (my_recs.r5 > 0){
@@ -504,6 +509,7 @@ int main(int argc, char *argv[]) {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
                         blocked_queues[msg.resource].push(msg.pid);
+                        break;
                     }
                     case 6:
                     if (my_recs.r6 > 0){
@@ -520,6 +526,7 @@ int main(int argc, char *argv[]) {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
                         blocked_queues[msg.resource].push(msg.pid);
+                        break;
                     }
                     case 7:
                     if (my_recs.r7 > 0){
@@ -536,6 +543,7 @@ int main(int argc, char *argv[]) {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
                         blocked_queues[msg.resource].push(msg.pid);
+                        break;
                     }
                     case 8:
                     if (my_recs.r8 > 0){
@@ -552,6 +560,7 @@ int main(int argc, char *argv[]) {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
                         blocked_queues[msg.resource].push(msg.pid);
+                        break;
                     }
                     case 9:
                     if (my_recs.r9 > 0){
@@ -568,6 +577,7 @@ int main(int argc, char *argv[]) {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
                         blocked_queues[msg.resource].push(msg.pid);
+                        break;
                     }
                 }
                 
