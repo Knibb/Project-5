@@ -443,7 +443,7 @@ int main(int argc, char *argv[]) {
                         } else {
                             // Not enough resources available, block the process
                             pcbTable[childIndex].blocked = msg.resource;
-                            blockedQ0[msg.resource].push(msg.pid);
+                            blockedQ0.push(msg.pid);
                             break;
                         }
                     case 1:
@@ -477,7 +477,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
-                        blockedQ2[msg.resource].push(msg.pid);
+                        blockedQ2.push(msg.pid);
                         break;
                     }
                     case 3:
@@ -494,7 +494,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
-                        blockedQ3[msg.resource].push(msg.pid);
+                        blockedQ3.push(msg.pid);
                         break;
                     }
                     case 4:
@@ -511,7 +511,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
-                        blockedQ4[msg.resource].push(msg.pid);
+                        blockedQ4.push(msg.pid);
                         break;
                     }
                     case 5:
@@ -528,7 +528,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
-                        blockedQ5[msg.resource].push(msg.pid);
+                        blockedQ5.push(msg.pid);
                         break;
                     }
                     case 6:
@@ -545,7 +545,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
-                        blockedQ6[msg.resource].push(msg.pid);
+                        blockedQ6.push(msg.pid);
                         break;
                     }
                     case 7:
@@ -562,7 +562,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
-                        blockedQ7[msg.resource].push(msg.pid);
+                        blockedQ7.push(msg.pid);
                         break;
                     }
                     case 8:
@@ -579,7 +579,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
-                        blockedQ8[msg.resource].push(msg.pid);
+                        blockedQ8.push(msg.pid);
                         break;
                     }
                     case 9:
@@ -596,7 +596,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
-                        blockedQ9[msg.resource].push(msg.pid);
+                        blockedQ9.push(msg.pid);
                         break;
                     }
                 }
