@@ -51,7 +51,17 @@ struct SimulatedClock {
     unsigned int nanoseconds;
 };
 
-vector<int> deadlockDetection(PCB processTable[], resource_descriptor resources, const vector<queue<pid_t>>& blocked_queues) {
+queue<int> removePid(queue<int> queue, int pid){
+    queue<int> funcQueue;
+    while (queue.size() > 0){
+        if (queue.front() != pid)
+        funcQueue.push(queue.front());
+        queue.pop();
+    }
+    return funcQueue;
+}
+
+vector<int> deadlockDetection(PCB processTable[], resource_descriptor resources) {
     PCB tempTable[18];
     resource_descriptor tempResources = resources;
     vector<int> deadlockedProcesses;
@@ -304,8 +314,18 @@ int main(int argc, char *argv[]) {
     int activeChildren = 0;
     int terminatedChildren = 0;
     
-    // Create a vector of blocked queues for each resource descriptor
-    vector<queue<pid_t>> blocked_queues(10);
+    // Create a blocked queues
+    queue<int>blockedQ0;
+    queue<int>blockedQ1;
+    queue<int>blockedQ2;
+    queue<int>blockedQ3;
+    queue<int>blockedQ4;
+    queue<int>blockedQ5;
+    queue<int>blockedQ6;
+    queue<int>blockedQ7;
+    queue<int>blockedQ8;
+    queue<int>blockedQ9;
+
 
     // Prime random number generation for time increment and forking
     random_device rd;
@@ -423,7 +443,7 @@ int main(int argc, char *argv[]) {
                         } else {
                             // Not enough resources available, block the process
                             pcbTable[childIndex].blocked = msg.resource;
-                            blocked_queues[msg.resource].push(msg.pid);
+                            blockedQ0[msg.resource].push(msg.pid);
                             break;
                         }
                     case 1:
@@ -440,7 +460,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
-                        blocked_queues[msg.resource].push(msg.pid);
+                        blockedQ1[msg.resource].push(msg.pid);
                         break;
                     }
                     case 2:
@@ -457,7 +477,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
-                        blocked_queues[msg.resource].push(msg.pid);
+                        blockedQ2[msg.resource].push(msg.pid);
                         break;
                     }
                     case 3:
@@ -474,7 +494,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
-                        blocked_queues[msg.resource].push(msg.pid);
+                        blockedQ3[msg.resource].push(msg.pid);
                         break;
                     }
                     case 4:
@@ -491,7 +511,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
-                        blocked_queues[msg.resource].push(msg.pid);
+                        blockedQ4[msg.resource].push(msg.pid);
                         break;
                     }
                     case 5:
@@ -508,7 +528,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
-                        blocked_queues[msg.resource].push(msg.pid);
+                        blockedQ5[msg.resource].push(msg.pid);
                         break;
                     }
                     case 6:
@@ -525,7 +545,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
-                        blocked_queues[msg.resource].push(msg.pid);
+                        blockedQ6[msg.resource].push(msg.pid);
                         break;
                     }
                     case 7:
@@ -542,7 +562,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
-                        blocked_queues[msg.resource].push(msg.pid);
+                        blockedQ7[msg.resource].push(msg.pid);
                         break;
                     }
                     case 8:
@@ -559,7 +579,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
-                        blocked_queues[msg.resource].push(msg.pid);
+                        blockedQ8[msg.resource].push(msg.pid);
                         break;
                     }
                     case 9:
@@ -576,7 +596,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
-                        blocked_queues[msg.resource].push(msg.pid);
+                        blockedQ9[msg.resource].push(msg.pid);
                         break;
                     }
                 }
@@ -659,19 +679,87 @@ int main(int argc, char *argv[]) {
             int unblockedIndex = -1; // Declare unblockedIndex here
             int unblockedPid;
 
-            // Check if any blocked processes can be unblocked
-            if (!blocked_queues[msg.resource].empty()) {
-                unblockedPid = blocked_queues[msg.resource].front();
-                blocked_queues[msg.resource].pop();
-
-                // Find the unblocked process in the PCB table
-                for (int i = 0; i < 18; i++) {
-                    if (pcbTable[i].pid == unblockedPid) {
-                        unblockedIndex = i;
-                        break;
-                    }
+            switch (msg.resource)
+            {
+            case 0:
+                if (blockedQ0.size() > 0){
+                    unblockedPid = blockedQ0.front();
+                    blockedQ0.pop();
                 }
+                break;
+            case 1:
+                if (blockedQ1.size() > 0){
+                    unblockedPid = blockedQ1.front();
+                    blockedQ1.pop();
+                }
+                break;
+            case 2:
+                if (blockedQ2.size() > 0){
+                    unblockedPid = blockedQ2.front();
+                    blockedQ2.pop();
+                }
+                break;
+            case 3:
+                if (blockedQ3.size() > 0){
+                    unblockedPid = blockedQ3.front();
+                    blockedQ3.pop();
+                }
+                break;
+            case 4:
+                if (blockedQ4.size() > 0){
+                    unblockedPid = blockedQ4.front();
+                    blockedQ4.pop();
+                }
+                break;
+            case 5:
+                if (blockedQ5.size() > 0){
+                    unblockedPid = blockedQ5.front();
+                    blockedQ5.pop();
+                }
+                break;
+            case 6:
+                if (blockedQ6.size() > 0){
+                    unblockedPid = blockedQ6.front();
+                    blockedQ6.pop();
+                }
+                break;
+            case 7:
+                if (blockedQ7.size() > 0){
+                    unblockedPid = blockedQ7.front();
+                    blockedQ7.pop();
+                }
+                break;
+            case 8:
+                if (blockedQ8.size() > 0){
+                    unblockedPid = blockedQ8.front();
+                    blockedQ8.pop();
+                }
+                break;
+            case 9:
+                if (blockedQ9.size() > 0){
+                    unblockedPid = blockedQ9.front();
+                    blockedQ9.pop();
+                }
+                break;
             }
+
+
+
+
+
+            // // Check if any blocked processes can be unblocked
+            // if (!blocked_queues[msg.resource].empty()) {
+            //     unblockedPid = blocked_queues[msg.resource].front();
+            //     blocked_queues[msg.resource].pop();
+
+            //     // Find the unblocked process in the PCB table
+            //     for (int i = 0; i < 18; i++) {
+            //         if (pcbTable[i].pid == unblockedPid) {
+            //             unblockedIndex = i;
+            //             break;
+            //         }
+            //     }
+            // }
 
             // Unblock the process and grant it the resource
             if (unblockedIndex != -1) {
@@ -689,7 +777,7 @@ int main(int argc, char *argv[]) {
                 }
             }
         }
-        vector<int> deadlockedPids = deadlockDetection(pcbTable, my_recs, blocked_queues);
+        vector<int> deadlockedPids = deadlockDetection(pcbTable, my_recs);
 
         // Log a message when deadlock detection is run
         log_message(logfile, verbose, false, "Master running deadlock detection at time %d:%d\n", simClock->seconds, simClock->nanoseconds);
@@ -705,46 +793,89 @@ int main(int argc, char *argv[]) {
                 exit(EXIT_FAILURE);
             }
 
-            // Free up resources held by the process with deadlockedPid
-            for (int j = 0; j < 10; ++j) {
-                switch (j) {
-                    case 0: my_recs.r0 += pcbTable[deadlockedPid].recs.r0; pcbTable[deadlockedPid].recs.r0 = 0; break;
-                    case 1: my_recs.r1 += pcbTable[deadlockedPid].recs.r1; pcbTable[deadlockedPid].recs.r1 = 0; break;
-                    case 2: my_recs.r2 += pcbTable[deadlockedPid].recs.r2; pcbTable[deadlockedPid].recs.r2 = 0; break;
-                    case 3: my_recs.r3 += pcbTable[deadlockedPid].recs.r3; pcbTable[deadlockedPid].recs.r3 = 0; break;
-                    case 4: my_recs.r4 += pcbTable[deadlockedPid].recs.r4; pcbTable[deadlockedPid].recs.r4 = 0; break;
-                    case 5: my_recs.r5 += pcbTable[deadlockedPid].recs.r5; pcbTable[deadlockedPid].recs.r5 = 0; break;
-                    case 6: my_recs.r6 += pcbTable[deadlockedPid].recs.r6; pcbTable[deadlockedPid].recs.r6 = 0; break;
-                    case 7: my_recs.r7 += pcbTable[deadlockedPid].recs.r7; pcbTable[deadlockedPid].recs.r7 = 0; break;
-                    case 8: my_recs.r8 += pcbTable[deadlockedPid].recs.r8; pcbTable[deadlockedPid].recs.r8 = 0; break;
-                    case 9: my_recs.r9 += pcbTable[deadlockedPid].recs.r9; pcbTable[deadlockedPid].recs.r9 = 0; break;
+            int index = 0;
+            for (int j = 0 ; j < 18 ; j++) {
+                if (deadlockedPid == pcbTable[j].pid) {
+                    index = j;
+                    break;
                 }
             }
 
+            my_recs.r0 += pcbTable[index].recs.r0;
+            pcbTable[index].recs.r0 = 0;
+
+            my_recs.r1 += pcbTable[index].recs.r1;
+            pcbTable[index].recs.r1 = 0;
+
+            my_recs.r2 += pcbTable[index].recs.r2;
+            pcbTable[index].recs.r2 = 0;
+
+            my_recs.r3 += pcbTable[index].recs.r3;
+            pcbTable[index].recs.r3 = 0;
+
+            my_recs.r4 += pcbTable[index].recs.r4;
+            pcbTable[index].recs.r4 = 0;
+
+            my_recs.r5 += pcbTable[index].recs.r5;
+            pcbTable[index].recs.r5 = 0;
+
+            my_recs.r6 += pcbTable[index].recs.r6;
+            pcbTable[index].recs.r6 = 0;
+            
+            my_recs.r7 += pcbTable[index].recs.r7;
+            pcbTable[index].recs.r7 = 0;
+
+            my_recs.r8 += pcbTable[index].recs.r8;
+            pcbTable[index].recs.r8 = 0;
+
+            my_recs.r9 += pcbTable[index].recs.r9;
+            pcbTable[index].recs.r9 = 0;
+
+            switch (pcbTable[index].blocked) {
+                case 0:
+                    blockedQ0 = removePid(blockedQ0, deadlockedPid);
+                    break;
+                case 1:
+                    blockedQ1 = removePid(blockedQ1, deadlockedPid);
+                    break;
+                case 2:
+                    blockedQ2 = removePid(blockedQ2, deadlockedPid);
+                    break;
+                case 3:
+                    blockedQ3 = removePid(blockedQ3, deadlockedPid);
+                    break;
+                case 4:
+                    blockedQ4 = removePid(blockedQ4, deadlockedPid);
+                    break;
+                case 5:
+                    blockedQ5 = removePid(blockedQ5, deadlockedPid);
+                    break;
+                case 6:
+                    blockedQ6 = removePid(blockedQ6, deadlockedPid);
+                    break;
+                case 7:
+                    blockedQ7 = removePid(blockedQ7, deadlockedPid);
+                    break;
+                case 8:
+                    blockedQ8 = removePid(blockedQ8, deadlockedPid);
+                    break;
+                case 9:
+                    blockedQ9 = removePid(blockedQ9, deadlockedPid);
+                    break;       
+            }
 
             // Remove the process with deadlockedPid from the process table
-            pcbTable[deadlockedPid].occupied = false;
-            pcbTable[deadlockedPid].pid = -1;
-            pcbTable[deadlockedPid].blocked = -1;
+            pcbTable[index].occupied = false;
+            pcbTable[index].pid = -1;
+            pcbTable[index].blocked = -1;
 
             // Wait for the child process to terminate
             wait(NULL);
+            terminatedChildren++;
 
             // Log a message when a process is terminated to resolve a deadlock
             log_message(logfile, verbose, false, "Master terminating P%d to remove deadlock\n", pcbTable[deadlockedPid].pid);
         }
-    }
-    
-    while (activeChildren > 0) {
-        int status;
-        pid_t pid = wait(&status);
-
-        if (pid < 0) {
-            perror("wait");
-            exit(EXIT_FAILURE);
-        }
-
-        activeChildren--;
     }
 
     // Detach from shared memory
