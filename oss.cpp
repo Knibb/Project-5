@@ -879,7 +879,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Detach from shared memory
-    if (shmdt(shmaddr) == -1) {
+    if (shmdt(simClock) == -1) {
         perror("shmdt");
         exit(EXIT_FAILURE);
     }
