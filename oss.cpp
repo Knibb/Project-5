@@ -19,7 +19,6 @@
 #include <sys/wait.h>
 #include "resource_descriptor.h"
 
-
 using namespace std;
 
 #define PERMS 0666
@@ -52,13 +51,13 @@ struct SimulatedClock {
 };
 
 queue<int> removePid(queue<int> queue, int pid){
-    queue<int> funcQueue;
+    queue<int> tempQueue;
     while (queue.size() > 0){
         if (queue.front() != pid)
-        funcQueue.push(queue.front());
+            tempQueue.push(queue.front());
         queue.pop();
     }
-    return funcQueue;
+    return tempQueue;
 }
 
 vector<int> deadlockDetection(PCB processTable[], resource_descriptor resources) {
@@ -460,7 +459,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         // Not enough resources available, block the process
                         pcbTable[childIndex].blocked = msg.resource;
-                        blockedQ1[msg.resource].push(msg.pid);
+                        blockedQ1.push(msg.pid);
                         break;
                     }
                     case 2:
