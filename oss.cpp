@@ -289,7 +289,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Initialize clock in shared memory
-    SimulatedClock *simClock = static_cast<SimulatedClock *>(shmaddr);
+    SimulatedClock *simClock = static_cast<SimulatedClock *>(simClock);
     simClock->seconds = 0;
     simClock->nanoseconds = 0;
 
