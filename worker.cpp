@@ -22,6 +22,11 @@ typedef struct msgbuffer {
     int amount;
 } msgbuffer;
 
+typedef struct SimulatedClock{
+    unsigned int seconds;
+    unsigned int nanoseconds;
+} SimulatedClock;
+
 const int REQUEST_RESOURCES = 1;
 const int RELEASE_RESOURCES = 0;
 const int TERMINATE = -1;

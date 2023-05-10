@@ -44,10 +44,10 @@ typedef struct PCB {
     struct resource_descriptor recs;
 }PCB;
 
-struct SimulatedClock {
+typedef struct SimulatedClock{
     unsigned int seconds;
     unsigned int nanoseconds;
-};
+} SimulatedClock;
 
 queue<int> removePid(queue<int> myQueue, int pid){
     queue<int> funcQueue;
