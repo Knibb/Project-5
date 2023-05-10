@@ -355,6 +355,8 @@ int main(int argc, char *argv[]) {
             simClock->seconds += simClock->nanoseconds / 1000000000;
             simClock->nanoseconds %= 1000000000;
         }
+
+        printf("made it past time check\n"); //comment out after testing
     
         // Check if it's time to fork a new child process
         if (simClock->nanoseconds >= nextForkTime && findEmptyPCBIndex(pcbTable, 18) != -1) {
@@ -379,6 +381,8 @@ int main(int argc, char *argv[]) {
                 activeChildren++;
                 children_created++;
 
+                printf("Made it to start of parent\n"); //comment out after testing
+
                 // Update the PCB table for the new child process
                 int childIndex = findEmptyPCBIndex(pcbTable, 18);
                 if (childIndex >= 0) {
@@ -389,6 +393,8 @@ int main(int argc, char *argv[]) {
                     pcbTable[childIndex].startNano = simClock->nanoseconds;
                 } 
             }
+
+            printf("post PCB update\n"); //comment out after testing
             
             //update the next fork time
             unsigned int forkIncrement = forkDis(gen);
