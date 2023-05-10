@@ -50,12 +50,12 @@ struct SimulatedClock {
     unsigned int nanoseconds;
 };
 
-queue<int> removePid(queue<int> queue, int pid){
+queue<int> removePid(queue<int> myQueue, int pid){
     queue<int> funcQueue;
-    while (queue.size() > 0){
-        if (queue.front() != pid)
-            funcQueue.push(queue.front());
-        queue.pop();
+    while (myQueue.size() > 0){
+        if (myQueue.front() != pid)
+            funcQueue.push(myQueue.front());
+        myQueue.pop();
     }
     return funcQueue;
 }
