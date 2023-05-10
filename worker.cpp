@@ -22,17 +22,9 @@ typedef struct msgbuffer {
     int amount;
 } msgbuffer;
 
-struct SimulatedClock {
-    unsigned int seconds;
-    unsigned int nanoseconds;
-};
-
 const int REQUEST_RESOURCES = 1;
 const int RELEASE_RESOURCES = 0;
 const int TERMINATE = -1;
-const key_t SHM_KEY = 1616; // Shared memory key
-int shmid;
-SimulatedClock* simClock;
 
 // Helper function to increment the appropriate resource field
 void increment_resource(struct resource_descriptor *locRec, int resource) {
@@ -95,14 +87,6 @@ int main(int argc, char* argv[]) {
         perror("msgget");
         exit(EXIT_FAILURE);
     }
-
-    // connect to our shared memory segment and see the simClock
-    int shmid = shmget(SHM_KEY, sizeof(SimulatedClock), PERMS);
-    if (shmid == -1) {
-        perror("shmget");
-        exit(EXIT_FAILURE);
-    }
-    SimulatedClock* simClock = (SimulatedClock*)shmat(shmid, NULL, 0);
 
     SimulatedClock startTime = *simClock;
     bool terminated = false;

@@ -26,7 +26,6 @@ using namespace std;
 const int MAX_REC = 20;
 const int MAX_USER_PROCESSES = 18;
 const int MAX_RUNTIME = 5;
-const key_t SHM_KEY = 1616; // Shared memory key
 
 typedef struct msgbuffer {
     long mtype;
@@ -200,12 +199,11 @@ void log_message(FILE *logfile, bool verbose_mode, bool is_verbose, const char *
     }
 }
 
-const int SHM_SIZE = sizeof(SimulatedClock) + MAX_USER_PROCESSES * sizeof(PCB);
-
 int main(int argc, char *argv[]) {
     
     time_t startTime = time(NULL);
     system("touch oss_mq.txt");
+    system("touch shm.txt");
     int msgid;
     key_t msg_key;
     msgbuffer msg;
@@ -269,8 +267,14 @@ int main(int argc, char *argv[]) {
     printf("Message queue setup\n");
 
     // Allocated shared memory
-    int shmid = shmget(SHM_KEY, SHM_SIZE, PERMS | IPC_CREAT);
-    if (shmid < 0) {
+    key_t SHM_KEY = ftok("shm.txt", 2);
+    if (SHM_KEY == -1) {
+        perror("shm ftok error");
+        exit(EXIT_FAILURE);
+    }
+
+    int shmid = shmget(SHM_KEY, sizeof(SimulatedClock), PERMS | IPC_CREAT);
+    if (shmid == -1) {
         perror("shmget");
         exit(EXIT_FAILURE);
     }
@@ -278,9 +282,9 @@ int main(int argc, char *argv[]) {
     printf("Shared memory setup\n");
     
     // Attach to shared memory
-    void *shmaddr = shmat(shmid, NULL, 0);
-    if (shmaddr == (void *)-1) {
-        perror("shmat");
+    SimulatedClock *simClock = (SimulatedClock *) shmat(shmid, NULL, 0);
+    if ((void *) simClock == (void *) -1) {
+        perror("shamt");
         exit(EXIT_FAILURE);
     }
 
@@ -288,12 +292,6 @@ int main(int argc, char *argv[]) {
     SimulatedClock *simClock = static_cast<SimulatedClock *>(shmaddr);
     simClock->seconds = 0;
     simClock->nanoseconds = 0;
-
-    // Detach from shared memory
-    if (shmdt(shmaddr) == -1) {
-        perror("shmdt");
-        exit(EXIT_FAILURE);
-    }
 
     resource_descriptor my_recs;
 
@@ -344,9 +342,6 @@ int main(int argc, char *argv[]) {
             // More than 5 seconds have passed
             MAX_TERMINATED = terminatedChildren;
         }
-
-        // Attach to shared memory
-        SimulatedClock *simClock = static_cast<SimulatedClock *>(shmaddr);
 
         // Increment simulated clock
         unsigned int increment = timeDis(gen);
