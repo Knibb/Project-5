@@ -404,7 +404,7 @@ int main(int argc, char *argv[]) {
             children_created++;
         }
 
-        ssize_t result = msgrcv(msgid, &msg, sizeof(msg) - sizeof(msg.mtype), 0, IPC_NOWAIT);
+        ssize_t result = msgrcv(msgid, &msg, sizeof(msgbuffer), getpid(), IPC_NOWAIT);
 
         if (result == -1) {
             // Check if the error was caused by no message being available

@@ -88,9 +88,6 @@ int main(int argc, char* argv[]) {
     locRec.r8 = 0;
     locRec.r9 = 0;
 
-
-
-
     // Connect to the message queue
     key_t msg_key = ftok("oss_mq.txt", 1);
     int msqid = msgget(msg_key, PERMS);
