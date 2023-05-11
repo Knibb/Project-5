@@ -333,7 +333,6 @@ int main(int argc, char *argv[]) {
         nextL_Sec = simClock->seconds;
     }
 
-    unsigned int nextForkTime = 0;
     int REQUEST_RESOURCES = 1;
     int RELEASE_RESOURCES = 0;
     int TERMINATE = -1;
