@@ -200,7 +200,8 @@ void log_message(FILE *logfile, bool verbose_mode, bool is_verbose, const char *
 }
 
 int main(int argc, char *argv[]) {
-    
+    string logName = "log";
+    FILE* logfile = fopen(logName.c_str(), "w");
     time_t startTime = time(NULL);
     system("touch oss_mq.txt");
     system("touch shm.txt");
@@ -223,11 +224,11 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    FILE *logfile = fopen("logfile.txt", "w");
-    if (logfile == NULL) {
-        perror("fopen");
-        exit(EXIT_FAILURE);
-    }
+    // FILE *logfile = fopen("logfile.txt", "w");
+    // if (logfile == NULL) {
+    //     perror("fopen");
+    //     exit(EXIT_FAILURE);
+    // }
 
 
     PCB pcbTable[18];
@@ -359,7 +360,7 @@ int main(int argc, char *argv[]) {
         // Check if it's time to fork a new child process
         if ((simClock->seconds > nextL_Sec || simClock->seconds == nextL_Sec && simClock->nanoseconds >= nextL_Nano) && findEmptyPCBIndex(pcbTable, 18) != -1) {
             printf("###################################################################################we're forking\n");
-
+            fprintf(logfile,"###################################################################################we're forking\n");
             pid_t pid = fork();
             
             if (pid < 0) {
