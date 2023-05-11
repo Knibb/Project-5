@@ -1,0 +1,25 @@
+Makefile
+
+should work without any issues and has been tested on the server without fail
+
+OSS
+
+On this project I finally got shared memory to work and I think message queues as well. I feel like my logic on the OSS side of things is actually really good the big issue is that something in there is causing it to not work properly and I for the life of me can't find it despite spending days trying. The big issue I had was actually coding the deadlock detection function and then the recovery after it. I know I've let it be known to any who would ask that I'm not a strong C/C++ coder, but I'm proud at how far I was able to make it in this project given my skill level.
+
+Worker
+
+I make it to worker but I never see any messages from it printed from the terminal and for the life of me I don't know why. I know my forking is worker as I see it in the log file but the only thing I see printed to the terminal is that I made it past the time check in OSS. 
+
+Verbose
+
+I tried getting verbose logging to work as well but I don't think my attempt at it worked and I'm out of time to try and make it work. OSS accepts the -v switch from the command line without errors but I didn't see any big changes at all in the code or log, so what I ended up doing was making regular logging of actions that occur throughout the code so that if I did get it working proper I would at least know PID is requesting, releasing, or terminating; followed by OSS stating that it performed the actions if possible.
+
+Problems:
+
+To many to count. The main one is that something is stopping my code from reaching the parent processes actions and thus the rest of the code. I feel like there is just 1, maybe 2, things that are preventing this from working as I intended. However, I can at least take pride that I did make progress in actually getting shared memory to work and the message queues up and running though the code never reaches them to see them function. All and all this project is another dud from me but a step in the right direction. I learned a lot from it.
+
+How to use run the program
+
+1. make
+2. ./oss or ./oss -v (-v for verbose logging if it would actually work)
+3. to see the log you can cat or vim "log" to. As it stands the only thing you will see here is that deadlock detection is ran and that a worker was forked off.
