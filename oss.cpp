@@ -207,7 +207,7 @@ int main(int argc, char *argv[]) {
     int msgid;
     key_t msg_key;
     msgbuffer msg;
-    int MAX_TERMINATED = 1;
+    int MAX_TERMINATED = 40;
     int opt;
     bool verbose = false;
     
