@@ -94,11 +94,19 @@ int main(int argc, char* argv[]) {
     }
 
     // Allocated shared memory
-    key_t SHM_KEY = ftok("shm.txt", 2); //yes shm.txt is setup earlier in the code
+    key_t SHM_KEY = ftok("shm.txt", 2);
     if (SHM_KEY == -1) {
         perror("shm ftok error");
         exit(EXIT_FAILURE);
     }
+
+    int shmid = shmget(SHM_KEY, sizeof(SimulatedClock), PERMS | IPC_CREAT);
+    if (shmid == -1) {
+        perror("shmget");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Shared memory setup in child\n");
 
     // Attach to shared memory
     SimulatedClock *simClock = (SimulatedClock *) shmat(shmid, NULL, 0);
