@@ -207,7 +207,7 @@ int main(int argc, char *argv[]) {
     int msgid;
     key_t msg_key;
     msgbuffer msg;
-    int MAX_TERMINATED = 40;
+    int MAX_TERMINATED = 1;
     int opt;
     bool verbose = false;
     
@@ -339,16 +339,17 @@ int main(int argc, char *argv[]) {
         time_t currentTime = time(NULL);
         if (difftime(currentTime, startTime) >= MAX_RUNTIME) {
             // More than 5 seconds have passed
-            MAX_TERMINATED = terminatedChildren;
+            MAX_TERMINATED = children_created;
         }
 
         // Increment simulated clock
-        unsigned int increment = timeDis(gen);
-        simClock->nanoseconds += increment;
+        printf("nano before %d\n", simClock->nanoseconds);
+        simClock->nanoseconds += 100000;
         if (simClock->nanoseconds >= 1000000000) {
-            simClock->seconds += simClock->nanoseconds / 1000000000;
-            simClock->nanoseconds %= 1000000000;
+            (simClock->seconds)++;
+            simClock->nanoseconds -= 1000000000;
         }
+        printf("nano after %d\n", simClock->nanoseconds);
 
         printf("made it past time check\n"); //comment out after testing
     
@@ -395,9 +396,6 @@ int main(int argc, char *argv[]) {
             //update the next fork time
             unsigned int forkIncrement = forkDis(gen);
             nextForkTime = simClock->nanoseconds + forkIncrement;
-
-            //Increment children_created
-            children_created++;
         }
 
         ssize_t result = msgrcv(msgid, &msg, sizeof(msgbuffer), getpid(), IPC_NOWAIT);
