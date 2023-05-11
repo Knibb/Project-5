@@ -34,16 +34,16 @@ const int TERMINATE = -1;
 // Helper function to increment the appropriate resource field
 void increment_resource(struct resource_descriptor &locRec, int resource) {
     switch (resource) {
-        case 0: locRec->r0++; break;
-        case 1: locRec->r1++; break;
-        case 2: locRec->r2++; break;
-        case 3: locRec->r3++; break;
-        case 4: locRec->r4++; break;
-        case 5: locRec->r5++; break;
-        case 6: locRec->r6++; break;
-        case 7: locRec->r7++; break;
-        case 8: locRec->r8++; break;
-        case 9: locRec->r9++; break;
+        case 0: locRec.r0++; break;
+        case 1: locRec.r1++; break;
+        case 2: locRec.r2++; break;
+        case 3: locRec.r3++; break;
+        case 4: locRec.r4++; break;
+        case 5: locRec.r5++; break;
+        case 6: locRec.r6++; break;
+        case 7: locRec.r7++; break;
+        case 8: locRec.r8++; break;
+        case 9: locRec.r9++; break;
         default: printf("Invalid resource number: %d\n", resource);
     }
 }
@@ -51,16 +51,16 @@ void increment_resource(struct resource_descriptor &locRec, int resource) {
 // Helper function to decrement the appropriate resource field
 void decrement_resource(struct resource_descriptor &locRec, int resource) {
     switch (resource) {
-        case 0: locRec->r0--; break;
-        case 1: locRec->r1--; break;
-        case 2: locRec->r2--; break;
-        case 3: locRec->r3--; break;
-        case 4: locRec->r4--; break;
-        case 5: locRec->r5--; break;
-        case 6: locRec->r6--; break;
-        case 7: locRec->r7--; break;
-        case 8: locRec->r8--; break;
-        case 9: locRec->r9--; break;
+        case 0: locRec.r0--; break;
+        case 1: locRec.r1--; break;
+        case 2: locRec.r2--; break;
+        case 3: locRec.r3--; break;
+        case 4: locRec.r4--; break;
+        case 5: locRec.r5--; break;
+        case 6: locRec.r6--; break;
+        case 7: locRec.r7--; break;
+        case 8: locRec.r8--; break;
+        case 9: locRec.r9--; break;
         default: printf("Invalid resource number: %d\n", resource);
     }
 }
