@@ -175,7 +175,7 @@ void set_resource_value(resource_descriptor& rd, int index, int value) {
 }
 
 int findEmptyPCBIndex(PCB pcbTable[], int tableSize) {
-    for (int i = 0; i < tableSize; ++i) {
+    for (int i = 0; i < tableSize; i++) {
         if (pcbTable[i].occupied == false) {
             return i;
         }
@@ -183,21 +183,23 @@ int findEmptyPCBIndex(PCB pcbTable[], int tableSize) {
     return -1; // All entries are occupied
 }
 
-unsigned int log_lines = 0;
-const unsigned int MAX_LOG_LINES = 100000;
+// couldn't get this to work.
 
-void log_message(FILE *logfile, bool verbose_mode, bool is_verbose, const char *format, ...) {
-    if (log_lines >= MAX_LOG_LINES) {
-        return;
-    }
-    if (verbose_mode || !is_verbose) {
-        va_list args;
-        va_start(args, format);
-        vfprintf(logfile, format, args);
-        va_end(args);
-        log_lines++;
-    }
-}
+// unsigned int log_lines = 0;
+// const unsigned int MAX_LOG_LINES = 100000;
+
+// void log_message(FILE *logfile, bool verbose_mode, bool is_verbose, const char *format, ...) {
+//     if (log_lines >= MAX_LOG_LINES) {
+//         return;
+//     }
+//     if (verbose_mode || !is_verbose) {
+//         va_list args;
+//         va_start(args, format);
+//         vfprintf(logfile, format, args);
+//         va_end(args);
+//         log_lines++;
+//     }
+// }
 
 int main(int argc, char *argv[]) {
     string logName = "log";
