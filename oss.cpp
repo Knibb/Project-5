@@ -322,12 +322,16 @@ int main(int argc, char *argv[]) {
     queue<int>blockedQ8;
     queue<int>blockedQ9;
 
-
-    // Prime random number generation for time increment and forking
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_int_distribution<> timeDis(5000, 1000000000);
-    uniform_int_distribution<> forkDis(1, 500);
+    int nextInterval = rand()% 500000000;
+    int nextL_Nano = simClock->nanoseconds + nextInterval;
+    int nextL_Sec;
+    if (nextL_Nano >= 1000000000)
+    {
+        nextL_Sec = simClock->seconds + 1;
+        nextL_Nano -= 1000000000;
+    } else {
+        nextL_Sec = simClock->seconds;
+    }
 
     unsigned int nextForkTime = 0;
     int REQUEST_RESOURCES = 1;
@@ -354,7 +358,7 @@ int main(int argc, char *argv[]) {
         printf("made it past time check\n"); //comment out after testing
     
         // Check if it's time to fork a new child process
-        if (simClock->nanoseconds >= nextForkTime && findEmptyPCBIndex(pcbTable, 18) != -1) {
+        if ((simClock->seconds > nextL_Sec || simClock->seconds == nextL_Sec && simClock->nanoseconds >= nextL_Nano) && findEmptyPCBIndex(pcbTable, 18) != -1) {
             printf("we're forking");
 
             pid_t pid = fork();
@@ -378,6 +382,18 @@ int main(int argc, char *argv[]) {
                 activeChildren++;
                 children_created++;
 
+                nextInterval = rand()% 500000000;
+                nextL_Nano = simClock->nanoseconds + nextInterval;
+                nextL_Sec;
+                if (nextL_Nano >= 1000000000)
+                {
+                    nextL_Sec = simClock->seconds + 1;
+                    nextL_Nano -= 1000000000;
+                } else {
+                    nextL_Sec = simClock->seconds;
+                }
+
+
                 printf("Made it to start of parent\n"); //comment out after testing
 
                 // Update the PCB table for the new child process
@@ -392,10 +408,6 @@ int main(int argc, char *argv[]) {
             }
 
             printf("post PCB update\n"); //comment out after testing
-            
-            //update the next fork time
-            unsigned int forkIncrement = forkDis(gen);
-            nextForkTime = simClock->nanoseconds + forkIncrement;
         }
 
         ssize_t result = msgrcv(msgid, &msg, sizeof(msgbuffer), getpid(), IPC_NOWAIT);
