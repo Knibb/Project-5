@@ -358,7 +358,7 @@ int main(int argc, char *argv[]) {
     
         // Check if it's time to fork a new child process
         if ((simClock->seconds > nextL_Sec || simClock->seconds == nextL_Sec && simClock->nanoseconds >= nextL_Nano) && findEmptyPCBIndex(pcbTable, 18) != -1) {
-            printf("we're forking");
+            printf("###################################################################################we're forking\n");
 
             pid_t pid = fork();
             
