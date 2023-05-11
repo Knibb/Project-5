@@ -261,10 +261,10 @@ int main(int argc, char* argv[]) {
 
                 // Process the reply
                 if (reply.action == REQUEST_RESOURCES) {
-                    increment_resource(&locRec, reply.resource);
+                    increment_resource(locRec, reply.resource);
 
                 }else if (reply.action == RELEASE_RESOURCES) {
-                    decrement_resource(&locRec, reply.resource);
+                    decrement_resource(locRec, reply.resource);
                     
                     
                 } else if (reply.action == TERMINATE) {
