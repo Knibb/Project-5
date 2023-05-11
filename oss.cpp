@@ -343,13 +343,13 @@ int main(int argc, char *argv[]) {
         }
 
         // Increment simulated clock
-        printf("nano before %d\n", simClock->nanoseconds);
-        simClock->nanoseconds += 100000;
+        printf("secs before %d\n", simClock->seconds);
+        simClock->nanoseconds += 1000000;
         if (simClock->nanoseconds >= 1000000000) {
             (simClock->seconds)++;
             simClock->nanoseconds -= 1000000000;
         }
-        printf("nano after %d\n", simClock->nanoseconds);
+        printf("secs after %d\n", simClock->seconds);
 
         printf("made it past time check\n"); //comment out after testing
     
