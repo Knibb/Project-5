@@ -768,7 +768,7 @@ int main(int argc, char *argv[]) {
         vector<int> deadlockedPids = deadlockDetection(pcbTable, my_recs);
 
         // Log a message when deadlock detection is run
-        log_message(logfile, verbose, false, "Master running deadlock detection at time %d:%d\n", simClock->seconds, simClock->nanoseconds);
+        fprintf(logfile, "Master running deadlock detection at time %d:%d\n", simClock->seconds, simClock->nanoseconds);
 
         for (int i = 0; i < deadlockedPids.size(); i++) {
             int deadlockedPid = deadlockedPids[i];
