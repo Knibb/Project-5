@@ -129,7 +129,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        printf("###############################################In worker: made it past time termination check\n"); //comment out after testing
+        printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!In worker: made it past time termination check\n"); //comment out after testing
 
         // If terminated, release all resources and send termination message
         if (terminated) {
