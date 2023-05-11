@@ -210,12 +210,12 @@ int main(int argc, char *argv[]) {
     msgbuffer msg;
     int MAX_TERMINATED = 40;
     int opt;
-    bool verbose = false;
+    bool verbose_mode = false;
     
     while ((opt = getopt(argc, argv, "v")) != -1) {
         switch (opt) {
             case 'v':
-                verbose = true;
+                verbose_mode = true;
                 break;
             default:
                 fprintf(stderr, "Usage: %s [-v]\n", argv[0]);
@@ -223,13 +223,6 @@ int main(int argc, char *argv[]) {
                 break;
         }
     }
-
-    // FILE *logfile = fopen("logfile.txt", "w");
-    // if (logfile == NULL) {
-    //     perror("fopen");
-    //     exit(EXIT_FAILURE);
-    // }
-
 
     PCB pcbTable[18];
     for (int i = 0; i < 18; i++)
@@ -422,6 +415,7 @@ int main(int argc, char *argv[]) {
             }
         } else {
             // Message received, process the message
+            fprintf(logfile,"message recieved from child\n");
             int childIndex = -1;
             for (int i = 0; i < MAX_USER_PROCESSES; ++i) {
                 if (pcbTable[i].pid == msg.pid) {
@@ -449,7 +443,7 @@ int main(int argc, char *argv[]) {
                                 perror("msgsnd");
                                 exit(EXIT_FAILURE);
                             }
-                            log_message(logfile, verbose, true, "Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 0, simClock->seconds, simClock->nanoseconds);
+                            fprintf(logfile,"Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 0, simClock->seconds, simClock->nanoseconds);
                             break;              
                         } else {
                             // Not enough resources available, block the process
@@ -466,7 +460,7 @@ int main(int argc, char *argv[]) {
                             perror("msgsnd");
                             exit(EXIT_FAILURE);
                         }
-                        log_message(logfile, verbose, true, "Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 1, simClock->seconds, simClock->nanoseconds);
+                        fprintf(logfile,"Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 1, simClock->seconds, simClock->nanoseconds);
                         break;                       
                     } else {
                         // Not enough resources available, block the process
@@ -483,7 +477,7 @@ int main(int argc, char *argv[]) {
                             perror("msgsnd");
                             exit(EXIT_FAILURE);
                         }
-                        log_message(logfile, verbose, true, "Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 2, simClock->seconds, simClock->nanoseconds);
+                        fprintf(logfile,"Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 2, simClock->seconds, simClock->nanoseconds);
                         break;                        
                     } else {
                         // Not enough resources available, block the process
@@ -500,7 +494,7 @@ int main(int argc, char *argv[]) {
                             perror("msgsnd");
                             exit(EXIT_FAILURE);
                         }
-                        log_message(logfile, verbose, true, "Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 3, simClock->seconds, simClock->nanoseconds);
+                        fprintf(logfile,"Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 3, simClock->seconds, simClock->nanoseconds);
                         break;                         
                     } else {
                         // Not enough resources available, block the process
@@ -517,7 +511,7 @@ int main(int argc, char *argv[]) {
                             perror("msgsnd");
                             exit(EXIT_FAILURE);
                         }
-                        log_message(logfile, verbose, true, "Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 4, simClock->seconds, simClock->nanoseconds);
+                        fprintf(logfile, "Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 4, simClock->seconds, simClock->nanoseconds);
                         break;                         
                     } else {
                         // Not enough resources available, block the process
@@ -534,7 +528,7 @@ int main(int argc, char *argv[]) {
                             perror("msgsnd");
                             exit(EXIT_FAILURE);
                         }
-                        log_message(logfile, verbose, true, "Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 5, simClock->seconds, simClock->nanoseconds);
+                        fprintf(logfile, "Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 5, simClock->seconds, simClock->nanoseconds);
                         break;                        
                     } else {
                         // Not enough resources available, block the process
@@ -551,7 +545,7 @@ int main(int argc, char *argv[]) {
                             perror("msgsnd");
                             exit(EXIT_FAILURE);
                         }
-                        log_message(logfile, verbose, true, "Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 6, simClock->seconds, simClock->nanoseconds);
+                        fprintf(logfile, "Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 6, simClock->seconds, simClock->nanoseconds);
                         break;                       
                     } else {
                         // Not enough resources available, block the process
@@ -568,7 +562,7 @@ int main(int argc, char *argv[]) {
                             perror("msgsnd");
                             exit(EXIT_FAILURE);
                         }
-                        log_message(logfile, verbose, true, "Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 7, simClock->seconds, simClock->nanoseconds);
+                        fprintf(logfile, "Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 7, simClock->seconds, simClock->nanoseconds);
                         break;                         
                     } else {
                         // Not enough resources available, block the process
@@ -585,7 +579,7 @@ int main(int argc, char *argv[]) {
                             perror("msgsnd");
                             exit(EXIT_FAILURE);
                         }
-                        log_message(logfile, verbose, true, "Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 8, simClock->seconds, simClock->nanoseconds);
+                        fprintf(logfile, "Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 8, simClock->seconds, simClock->nanoseconds);
                         break;                        
                     } else {
                         // Not enough resources available, block the process
@@ -602,7 +596,7 @@ int main(int argc, char *argv[]) {
                             perror("msgsnd");
                             exit(EXIT_FAILURE);
                         }
-                        log_message(logfile, verbose, true, "Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 9, simClock->seconds, simClock->nanoseconds);
+                        fprintf(logfile, "Master granting P%d request R%d at time %d:%d\n", pcbTable[childIndex].pid, 9, simClock->seconds, simClock->nanoseconds);
                         break;                        
                     } else {
                         // Not enough resources available, block the process
@@ -618,56 +612,57 @@ int main(int argc, char *argv[]) {
                     case 0:
                         pcbTable[childIndex].recs.r0 -= 1;
                         my_recs.r0++;
-                        log_message(logfile, verbose, true, "Master has acknowledged P%d releasing R%d at time %d:%d\n", pcbTable[childIndex].pid, 0, simClock->seconds, simClock->nanoseconds);
+                        fprintf(logfile, "Master has acknowledged P%d releasing R%d at time %d:%d\n", pcbTable[childIndex].pid, 0, simClock->seconds, simClock->nanoseconds);
                         break;
                     case 1:
                         pcbTable[childIndex].recs.r1 -= 1;
                         my_recs.r1++;
-                        log_message(logfile, verbose, true, "Master has acknowledged P%d releasing R%d at time %d:%d\n", pcbTable[childIndex].pid, 1, simClock->seconds, simClock->nanoseconds);
+                        fprintf(logfile, "Master has acknowledged P%d releasing R%d at time %d:%d\n", pcbTable[childIndex].pid, 1, simClock->seconds, simClock->nanoseconds);
                         break;
                     case 2:
                         pcbTable[childIndex].recs.r2 -= 1;
                         my_recs.r2++;
-                        log_message(logfile, verbose, true, "Master has acknowledged P%d releasing R%d at time %d:%d\n", pcbTable[childIndex].pid, 2, simClock->seconds, simClock->nanoseconds);
+                        fprintf(logfile, "Master has acknowledged P%d releasing R%d at time %d:%d\n", pcbTable[childIndex].pid, 2, simClock->seconds, simClock->nanoseconds);
                         break;
                     case 3:
                         pcbTable[childIndex].recs.r3 -= 1;
                         my_recs.r3++;
-                        log_message(logfile, verbose, true, "Master has acknowledged P%d releasing R%d at time %d:%d\n", pcbTable[childIndex].pid, 3, simClock->seconds, simClock->nanoseconds);
+                        fprintf(logfile, "Master has acknowledged P%d releasing R%d at time %d:%d\n", pcbTable[childIndex].pid, 3, simClock->seconds, simClock->nanoseconds);
                         break;
                     case 4:
                         pcbTable[childIndex].recs.r4 -= 1;
                         my_recs.r4++;
-                        log_message(logfile, verbose, true, "Master has acknowledged P%d releasing R%d at time %d:%d\n", pcbTable[childIndex].pid, 4, simClock->seconds, simClock->nanoseconds);
+                        fprintf(logfile, "Master has acknowledged P%d releasing R%d at time %d:%d\n", pcbTable[childIndex].pid, 4, simClock->seconds, simClock->nanoseconds);
                         break;
                     case 5:
                         pcbTable[childIndex].recs.r5 -= 1;
                         my_recs.r5++;
-                        log_message(logfile, verbose, true, "Master has acknowledged P%d releasing R%d at time %d:%d\n", pcbTable[childIndex].pid, 5, simClock->seconds, simClock->nanoseconds);
+                        fprintf(logfile, "Master has acknowledged P%d releasing R%d at time %d:%d\n", pcbTable[childIndex].pid, 5, simClock->seconds, simClock->nanoseconds);
                         break;
                     case 6:
                         pcbTable[childIndex].recs.r6 -= 1;
                         my_recs.r6++;
-                        log_message(logfile, verbose, true, "Master has acknowledged P%d releasing R%d at time %d:%d\n", pcbTable[childIndex].pid, 6, simClock->seconds, simClock->nanoseconds);
+                        fprintf(logfile, "Master has acknowledged P%d releasing R%d at time %d:%d\n", pcbTable[childIndex].pid, 6, simClock->seconds, simClock->nanoseconds);
                         break;
                     case 7:
                         pcbTable[childIndex].recs.r7 -= 1;
                         my_recs.r7++;
-                        log_message(logfile, verbose, true, "Master has acknowledged P%d releasing R%d at time %d:%d\n", pcbTable[childIndex].pid, 7, simClock->seconds, simClock->nanoseconds);
+                        fprintf(logfile, "Master has acknowledged P%d releasing R%d at time %d:%d\n", pcbTable[childIndex].pid, 7, simClock->seconds, simClock->nanoseconds);
                         break;
                     case 8:
                         pcbTable[childIndex].recs.r8 -= 1;
                         my_recs.r8++;
-                        log_message(logfile, verbose, true, "Master has acknowledged P%d releasing R%d at time %d:%d\n", pcbTable[childIndex].pid, 8, simClock->seconds, simClock->nanoseconds);
+                        fprintf(logfile, "Master has acknowledged P%d releasing R%d at time %d:%d\n", pcbTable[childIndex].pid, 8, simClock->seconds, simClock->nanoseconds);
                         break;
                     case 9:
                         pcbTable[childIndex].recs.r9 -= 1;
                         my_recs.r9++;
-                        log_message(logfile, verbose, true, "Master has acknowledged P%d releasing R%d at time %d:%d\n", pcbTable[childIndex].pid, 9, simClock->seconds, simClock->nanoseconds);
+                        fprintf(logfile, "Master has acknowledged P%d releasing R%d at time %d:%d\n", pcbTable[childIndex].pid, 9, simClock->seconds, simClock->nanoseconds);
                         break;
                 }
             } else if (msg.action == TERMINATE) {
                 // Terminate process
+                fprintf(logfile, "Master is terminating P%d\n", pcbTable[childIndex].pid);
                 wait(NULL); // wait for resources to get released and for process to die
                 terminatedChildren++;
                 activeChildren--;
@@ -753,24 +748,6 @@ int main(int argc, char *argv[]) {
                 }
                 break;
             }
-
-
-
-
-
-            // // Check if any blocked processes can be unblocked
-            // if (!blocked_queues[msg.resource].empty()) {
-            //     unblockedPid = blocked_queues[msg.resource].front();
-            //     blocked_queues[msg.resource].pop();
-
-            //     // Find the unblocked process in the PCB table
-            //     for (int i = 0; i < 18; i++) {
-            //         if (pcbTable[i].pid == unblockedPid) {
-            //             unblockedIndex = i;
-            //             break;
-            //         }
-            //     }
-            // }
 
             // Unblock the process and grant it the resource
             if (unblockedIndex != -1) {
