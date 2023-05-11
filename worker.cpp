@@ -177,18 +177,8 @@ int main(int argc, char* argv[]) {
                 msg.action = TERMINATE;
             }
             bool sendMessage = false;
-            char* choiceMessage;
 
-            if (msg.action == 1) {
-                choiceMessage = request;
-            } else if (msg.action == 0) {
-                choiceMessage = release;
-            } else {
-                perror("invalid choice was made\n");
-                exit(EXIT_FAILURE);
-            }
-
-            printf("Worker PID:%d has chosen to %s\n", getpid(), choiceMessage)
+            printf("Worker PID:%d has chosen to %s\n", getpid(), msg.action);
 
             switch (msg.resource) {
                 case 0:
