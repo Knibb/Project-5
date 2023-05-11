@@ -862,7 +862,7 @@ int main(int argc, char *argv[]) {
             terminatedChildren++;
 
             // Log a message when a process is terminated to resolve a deadlock
-            log_message(logfile, verbose, false, "Master terminating P%d to remove deadlock\n", pcbTable[deadlockedPid].pid);
+            fprintf(logfile, "Master terminating P%d to remove deadlock\n", pcbTable[deadlockedPid].pid);
         }
     }
 
