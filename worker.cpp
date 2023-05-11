@@ -115,8 +115,11 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
 
+
     SimulatedClock startTime = *simClock;
     bool terminated = false;
+
+    printf("simClock time captured by child\n");
 
     while(1) {
 
@@ -137,6 +140,8 @@ int main(int argc, char* argv[]) {
             msg.mtype = 1; 
             msg.pid = pid;
             msg.action = TERMINATE;
+
+            printf("Worker is deciding to terminate pid%d\n", getpid());
 
             if (msgsnd(msqid, &msg, sizeof(msg) - sizeof(long), 0) == -1) {
                 perror("msgsnd");
@@ -172,7 +177,18 @@ int main(int argc, char* argv[]) {
                 msg.action = TERMINATE;
             }
             bool sendMessage = false;
+            char* choiceMessage;
 
+            if (msg.action == 1) {
+                choiceMessage = request;
+            } else if (msg.action == 0) {
+                choiceMessage = release;
+            } else {
+                perror("invalid choice was made\n");
+                exit(EXIT_FAILURE);
+            }
+
+            printf("Worker PID:%d has chosen to %s\n", getpid(), choiceMessage)
 
             switch (msg.resource) {
                 case 0:
