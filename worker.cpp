@@ -93,6 +93,20 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    // Allocated shared memory
+    key_t SHM_KEY = ftok("shm.txt", 2); //yes shm.txt is setup earlier in the code
+    if (SHM_KEY == -1) {
+        perror("shm ftok error");
+        exit(EXIT_FAILURE);
+    }
+
+    // Attach to shared memory
+    SimulatedClock *simClock = (SimulatedClock *) shmat(shmid, NULL, 0);
+    if ((void *) simClock == (void *) -1) {
+        perror("shamt");
+        exit(EXIT_FAILURE);
+    }
+
     SimulatedClock startTime = *simClock;
     bool terminated = false;
 
