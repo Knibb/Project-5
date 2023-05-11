@@ -32,7 +32,7 @@ const int RELEASE_RESOURCES = 0;
 const int TERMINATE = -1;
 
 // Helper function to increment the appropriate resource field
-void increment_resource(struct resource_descriptor *locRec, int resource) {
+void increment_resource(struct resource_descriptor &locRec, int resource) {
     switch (resource) {
         case 0: locRec->r0++; break;
         case 1: locRec->r1++; break;
@@ -49,7 +49,7 @@ void increment_resource(struct resource_descriptor *locRec, int resource) {
 }
 
 // Helper function to decrement the appropriate resource field
-void decrement_resource(struct resource_descriptor *locRec, int resource) {
+void decrement_resource(struct resource_descriptor &locRec, int resource) {
     switch (resource) {
         case 0: locRec->r0--; break;
         case 1: locRec->r1--; break;
@@ -118,81 +118,166 @@ int main(int argc, char* argv[]) {
     SimulatedClock startTime = *simClock;
     bool terminated = false;
 
-    // Check if it's time to terminate
-    unsigned int elapsedTime = (simClock->seconds - startTime.seconds) * 1000000000 + (simClock->nanoseconds - startTime.nanoseconds);
-    if (elapsedTime >= 1000000000) { // 1 second in nanoseconds
-        int terminateChance = rand() % 100;
-        if (terminateChance < 10) { // 10% chance to terminate after 1 second
-            terminated = true;
+    while(1) {
+
+        // Check if it's time to terminate
+        unsigned int elapsedTime = (simClock->seconds - startTime.seconds) * 1000000000 + (simClock->nanoseconds - startTime.nanoseconds);
+        if (elapsedTime >= 1000000000) { // 1 second in nanoseconds
+            int terminateChance = rand() % 100;
+            if (terminateChance < 10) { // 10% chance to terminate after 1 second
+                terminated = true;
+            }
         }
-    }
 
-    printf("In worker: made it past time termination check\n"); //comment out after testing
+        printf("In worker: made it past time termination check\n"); //comment out after testing
 
-    // If terminated, release all resources and send termination message
-    if (terminated) {
-        msgbuffer msg;
-        msg.mtype = 1; 
-        msg.pid = pid;
-        msg.action = TERMINATE;
-
-        if (msgsnd(msqid, &msg, sizeof(msg) - sizeof(long), 0) == -1) {
-            perror("msgsnd");
-            exit(EXIT_FAILURE);
-        }
-    } else {
-
-        // Prepare the message
-        msgbuffer msg;
-        msg.mtype = 1; 
-        msg.pid = pid;
-
-        // Randomly decide between requesting resources, releasing resources, or terminating
-        int rand_decision = rand() % 100;
-
-        if (rand_decision < 80) { // 80% chance of requesting resources
-            msg.action = REQUEST_RESOURCES;
-            msg.resource = rand() % 10; // Randomly choose a resource from r0 to r9
-            msg.amount = 1; // Request one resource
-        } else if (rand_decision < 95) { // 15% chance of releasing resources
-            msg.action = RELEASE_RESOURCES;
-            msg.resource = rand() % 10; // Randomly choose a resource from r0 to r9
-            msg.amount = 1; // Release one resource
-        } else { // 5% chance of terminating
+        // If terminated, release all resources and send termination message
+        if (terminated) {
+            msgbuffer msg;
+            msg.mtype = 1; 
+            msg.pid = pid;
             msg.action = TERMINATE;
-        }
 
+            if (msgsnd(msqid, &msg, sizeof(msg) - sizeof(long), 0) == -1) {
+                perror("msgsnd");
+                exit(EXIT_FAILURE);
+            }
 
-        // Send the message to the parent process (oss)
-        if (msgsnd(msqid, &msg, sizeof(msg) - sizeof(long), 0) == -1) {
-            perror("msgsnd");
-            exit(EXIT_FAILURE);
-        }
-
-        // Wait for a message back indicating the request was granted before continuing
-        msgbuffer reply;
-        reply.mtype = getppid();
-
-        if (msgrcv(msqid, &reply, sizeof(msgbuffer) - sizeof(long), pid, 0) == -1) {
-            perror("msgrcv");
-            exit(EXIT_FAILURE);
-        }
-
-        // Process the reply
-        if (reply.action == REQUEST_RESOURCES) {
-            increment_resource(&locRec, reply.resource);
-
-        }else if (reply.action == RELEASE_RESOURCES) {
-            decrement_resource(&locRec, reply.resource);
-            
-        } else if (reply.action == TERMINATE) {
             // Detach from shared memory before exiting normally
             if (shmdt(simClock) == -1) {
                 perror("shmdt");
-                exit(EXIT_SUCCESS);
+                exit(EXIT_FAILURE);
+            }
+            exit(EXIT_SUCCESS);
+
+        } else {
+
+            // Prepare the message
+            msgbuffer msg;
+            msg.mtype = 1; 
+            msg.pid = pid;
+
+            // Randomly decide between requesting resources, releasing resources, or terminating
+            int rand_decision = rand() % 100;
+
+            if (rand_decision < 80) { // 80% chance of requesting resources
+                msg.action = REQUEST_RESOURCES;
+                msg.resource = rand() % 10; // Randomly choose a resource from r0 to r9
+                msg.amount = 1; // Request one resource
+            } else if (rand_decision < 95) { // 15% chance of releasing resources
+                msg.action = RELEASE_RESOURCES;
+                msg.resource = rand() % 10; // Randomly choose a resource from r0 to r9
+                msg.amount = 1; // Release one resource
+            } else { // 5% chance of terminating
+                msg.action = TERMINATE;
+            }
+            bool sendMessage = false;
+
+
+            switch (msg.resource) {
+                case 0:
+                    if (locRec.r0 < 20) {
+                        sendMessage = true;
+                    }
+                    break;
+                case 1:
+                    if (locRec.r1 < 20) {
+                        sendMessage = true;
+                    }
+                    break;
+                case 2:
+                    if (locRec.r2 < 20) {
+                        sendMessage = true;
+                    }
+                    break;
+                case 3:
+                    if (locRec.r3 < 20) {
+                        sendMessage = true;
+                    }
+                    break;
+                case 4:
+                    if (locRec.r4 < 20) {
+                        sendMessage = true;
+                    }
+                    break;
+                case 5:
+                    if (locRec.r5 < 20) {
+                        sendMessage = true;
+                    }
+                    break;
+                case 6:
+                    if (locRec.r6 < 20) {
+                        sendMessage = true;
+                    }
+                    break;
+                case 7:
+                    if (locRec.r7 < 20) {
+                        sendMessage = true;
+                    }
+                    break;
+                case 8:
+                    if (locRec.r8 < 20) {
+                        sendMessage = true;
+                    }
+                    break;
+                case 9:
+                    if (locRec.r9 < 20) {
+                        sendMessage = true;
+                    }
+                    break;
+                default:
+                    printf("error: Resource request default\n");
+                    exit(EXIT_FAILURE);
+                    break;
+            }
+
+
+
+
+            if (sendMessage) {
+                // Send the message to the parent process (oss)
+                if (msgsnd(msqid, &msg, sizeof(msg) - sizeof(long), 0) == -1) {
+                    perror("msgsnd");
+                    exit(EXIT_FAILURE);
+                }
+
+                if (msg.action == TERMINATE) {
+                    // Detach from shared memory before exiting normally
+                    if (shmdt(simClock) == -1) {
+                        perror("shmdt");
+                        exit(EXIT_FAILURE);
+                    }
+                    exit(EXIT_SUCCESS);
+                }
+
+                // Wait for a message back indicating the request was granted before continuing
+                msgbuffer reply;
+                reply.mtype = getppid();
+
+                if (msgrcv(msqid, &reply, sizeof(msgbuffer) - sizeof(long), pid, 0) == -1) {
+                    perror("msgrcv");
+                    exit(EXIT_FAILURE);
+                }
+
+                // Process the reply
+                if (reply.action == REQUEST_RESOURCES) {
+                    increment_resource(&locRec, reply.resource);
+
+                }else if (reply.action == RELEASE_RESOURCES) {
+                    decrement_resource(&locRec, reply.resource);
+                    
+                    
+                } else if (reply.action == TERMINATE) {
+                    // Detach from shared memory before exiting normally
+                    if (shmdt(simClock) == -1) {
+                        perror("shmdt");
+                        exit(EXIT_FAILURE);
+                    }
+                    exit(EXIT_SUCCESS);
+                }
             }
         }
-    } 
+    }
 
     // Detach from shared memory before exiting normally
     if (shmdt(simClock) == -1) {
